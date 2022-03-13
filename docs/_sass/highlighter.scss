@@ -10,7 +10,9 @@
   margin: 0;
   padding: 0;
 }
-.highlight,
+.highlight {
+  margin-left: 0;
+}
 .highlight .hll {
   background-color: #44475a;
 }
