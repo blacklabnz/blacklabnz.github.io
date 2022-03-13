@@ -23,7 +23,7 @@ The diagram I took from internet explains it quite well. In simple term, you int
 You could easily find some publicly availabel websocket API, the one I used for this blog is from Binance, one of the platform used by coin traders. Though myself is not doing any coin trading nor receiving any sponsorship from them. 
 They have very detailed API documentation on their [Spot API](https://github.com/binance/binance-spot-api-docs). 
 
-{% highlight python %}
+{% highlight python linenos %}
 socket2 = 'wss://stream.binance.com:9443/ws/bnbusdt@kline_1m'
 
 prev=0
