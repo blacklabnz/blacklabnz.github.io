@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Russo+One&family=Nunito+Sans:wght@200&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@200;600;800&display=swap");
 
 body {
   background-color: #fff;
@@ -506,7 +506,8 @@ footer {
   display: block;
   padding: 12px;
   text-decoration: none;
-  font-family: 'Russo one', sans-serif;
+  font-family: 'Nunito Sans', sans-serif;
+  font-weight: 600;
   font-size: 20px;
   margin: 20px 0px 20px 0px;
 }
@@ -521,15 +522,18 @@ footer {
 }
 
 .profile {
-  font-family: 'Russo one', sans-serif;
+  font-family: 'Nunito Sans', sans-serif;
   color: rgb(255, 255, 255);
   h1 {
     font-size: 25px;
+    font-weight: 800;
   }
   h2 {
     font-size: 20px;
+    font-weight: 800;
   }
   p {
     font-size: 15px;
+    font-weight: 600;
   }
 }
