@@ -219,11 +219,11 @@ pre {
 }
 
 pre {
-  max-width: 500px;
+  // max-width: 500px;
   padding: 8px 15px;
-  background: #f8f8f8;
+  background-color: #18181f;
   border-radius: 5px;
-  border: 1px solid #e5e5e5;
+  // border: 1px solid #595959;
   overflow-x: auto;
 }
 
@@ -236,7 +236,7 @@ th,
 td {
   text-align: left;
   padding: 5px 10px;
-  border-bottom: 1px solid #e5e5e5;
+  // border-bottom: 1px solid #e40d0d;
 }
 
 dt {
@@ -337,11 +337,14 @@ header ul a strong {
 }
 
 section {
-  width: 650px;
+  width: 65%;
   // float:220px;
   padding-top: 4em;
   padding-bottom: 50px;
   margin-left: 260px;
+  p {
+    font-size: 20px;
+  }
 }
 
 small {

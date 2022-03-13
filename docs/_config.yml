@@ -10,3 +10,4 @@ google_analytics: G-FDV12HCDKK
 favicon: ./assets/img/favicon-cloud.png
 favicon_dark: ./assets/img/favicon-cloud.png
 canonical: https://unknownyet/
+highlighter: rouge
