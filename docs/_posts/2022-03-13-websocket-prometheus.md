@@ -288,10 +288,10 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - C:/gitrepo/blacklab/pybi/prometheus.yml:/etc/prometheus/prometheus.yml
+      - /pathofown/prometheus.yml:/etc/prometheus/prometheus.yml
 {% endhighlight %}
 
-Before running this you will also need a prometheus configuration file, in a nutshell in this file you will specify the metrics endpoint from where the server is going to collect data from.
+Before running this you will also need a prometheus configuration file with the name of "prometheus.yml", in a nutshell in this file you will specify the metrics endpoint from where the server is going to collect data from. When running the Prometheus container, you need to mount the [volume](https://docs.docker.com/storage/volumes/) for you Prometheus container so that this config file is place in "/etc/prometheus/prometheus.yml" at container runtime.
 
 {% highlight yaml linenos %}
 global:
@@ -315,4 +315,18 @@ Line 11 specifies the port and DNS name of the metric endpoint created in Part 3
 <i class="fas fa-exclamation-circle"></i>
 Note the Prometheus server configuration could be way more complicated than what we are doing here.Again the purpose of this blog is not to setup prometheus for production, we only what to tip our teo on the surface and have a feel on it!
 </div>
-Getting little tired now, to be continued! 
+
+Lets start Docker Desktop and run Prometheus server locally either using docker cmd or docker-compose at choice of yours. 
+When navigating to http://localhost:9090/targets，voilà ！Both the Prometheus server and the Metric endpoints for the websocekt are up and running !
+
+![prometheus1](/assets/blog_images/websocket-prometheus/prometheus1.png)
+
+As you can see both of the jobs that you specified in the prometheus.yml file are running !
+
+When navigate back to the graph page, you can easily enter "symbolPrice" in the search box and hit execute. You then should be able to see a graph like the following and you can highligh different lables to see the price change for each of the symbols. In may case I selected "BNBUSDT-high"
+
+![prometheus2](/assets/blog_images/websocket-prometheus/prometheus2.png)
+
+Congratulations! You'v just reach the end of this blog, I know right ? It is a rather long blog to read, but at least I found the excercis pretty interesting and when you see the graph in Prometheus, it somewhat feeling really comforting ! 
+
+Thanks for you patience, see you at my next blog !! 
