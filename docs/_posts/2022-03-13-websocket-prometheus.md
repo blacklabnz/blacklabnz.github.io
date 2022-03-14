@@ -240,7 +240,7 @@ Line 5 create a Gauge object, a Guage is a type of metrics to record a value. Li
 Line 6 create a Prometheus endpoint where you could see the metrics at http://localhost:8080.
 
 When you run python code with above updates, you could start the metrics endpoint from http://localhost:8080 and see the following output. When you refresh the page you should be able to see symbol high and low price being updated!
-yay ! :smile:
+yay ! 😀
 
 {% highlight python linenos %}
 # HELP python_gc_objects_collected_total Objects collected during gc

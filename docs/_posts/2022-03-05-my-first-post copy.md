@@ -13,7 +13,3 @@ This is Excerpt for my first post
 
 **Hello world**, this is my first Jekyll blog post.
 
-I hope you like it!
-
-![test image](/assets/blog_images/terra.png)
-
