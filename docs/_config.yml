@@ -1,13 +1,21 @@
 title: blacklabnz
 position: Data Engineer
-description: Former DevOps Engineer
+description: Data Engineer DevOps Engineer
+pre_position: Former DevOps Engineer
 email: 
 keywords: DevOps Data
-github_link: https://github.com/blacklabnz
-linkedin: https://www.linkedin.com/in/neilxu
+social:
+  name: Neil Xu
+  links:
+    - https://www.linkedin.com/in/neilxu
+    - https://github.com/blacklabnz
 avatar: ./assets/img/avatar.png
 google_analytics: G-FDV12HCDKK
-favicon: ./assets/img/favicon-cloud.png
-favicon_dark: ./assets/img/favicon-cloud.png
-canonical: https://unknownyet/
-highlighter: rouge
+favicon: 
+  light: ./assets/img/favicon-cloud.png
+  dark: ./assets/img/favicon-cloud.png
+canonical: https://blacklabnz.github.io
+url: https://blacklabnz.github.io
+plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap

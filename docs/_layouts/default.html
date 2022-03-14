@@ -13,8 +13,8 @@
     <link rel="canonical" href="{{ site.canonical }}"/>
     {% endif %}
 
-    <link rel="icon" media="(prefers-color-scheme:dark)" href="{{ site.favicon_dark | relative_url }}" type="image/png" />
-    <link rel="icon" media="(prefers-color-scheme:light)" href="{{ site.favicon | relative_url }}" type="image/png" />
+    <link rel="icon" media="(prefers-color-scheme:dark)" href="{{ site.favicon.dark | relative_url }}" type="image/png" />
+    <link rel="icon" media="(prefers-color-scheme:light)" href="{{ site.favicon.light | relative_url }}" type="image/png" />
     <script src="{{ '/assets/js/favicon-switcher.js' | relative_url }}  " type="application/javascript"></script>
 
     <link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin=anonymous>
@@ -24,6 +24,7 @@
     {% if jekyll.environment == 'production' and site.google_analytics %}
     {% include analytics.html %}
     {% endif %}
+    {% seo %}
   </head>
   <body>
     <div class="wrapper">
@@ -36,14 +37,13 @@
           {% if site.position %}
           <h2>{{ site.position }}</h2>
           {% endif %}
-          {% if site.description %}
-          <p>{{ site.description }}</p>
+          {% if site.prev_position %}
+          <p>{{ site.prev_position }}</p>
           {% endif %}
           {% if site.email %}
           <p>{{ site.email }}</p>
           {% endif %}
         </div>
-
         <div class="vertical-menu">
           {%- for page in site.pages -%}
             {% if page.title %}
@@ -53,20 +53,20 @@
             {% endif %}
           {%- endfor -%}
         </div>
-        
         <div class="social-icons">
-          {% if site.linkedin %}
-          <a href="{{ site.linkedin }}" target="_blank">
-            <i class="fab fa-linkedin-in"></i>
-          </a>
-          {% endif %}
-          {% if site.github_link %}            
-          <a href="{{ site.github_link }}" target="_blank">
-            <i class="fab fa-github"></i>
-          </a>
-          {% endif %}
+          {% for link in site.social.links %}
+            {% if link contains "linkedin" %}
+              <a href="{{ link }}" target="_blank">
+                <i class="fab fa-linkedin-in"></i>
+              </a>
+            {% endif %}
+            {% if link contains "github" %}
+              <a href="{{ link }}" target="_blank">
+                <i class="fab fa-github"></i>
+              </a>
+            {% endif %}
+          {% endfor %}
         </div>
-
       </header>
       <section>
       {{ content }}
