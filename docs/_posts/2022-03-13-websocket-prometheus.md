@@ -30,7 +30,7 @@ They have very detailed API documentation on their [Spot API](https://github.com
 
 The following code snippet can be used to connect to websocket API:
 
-{% highlight python linenos %}
+```python
 import json
 import websocket
 
@@ -56,7 +56,7 @@ ws = websocket.WebSocketApp(
     on_error=on_error, 
     on_close=on_close )
 ws.run_forever()
-{% endhighlight %}
+```
 
 ### Quick explanation
 
@@ -70,21 +70,21 @@ Line 19 and 10 creates a websocket instance and start connection and run forever
 
 Run the above python code will give you this console output:
 
-{% highlight python linenos %}
+```python
 (venv) λ python run.py
 Opened connection
 {'e': 'kline', 'E': 1647220248756, 's': 'BNBUSDT', 'k': {'t': 1647220200000, 'T': 1647220259999, 's': 'BNBUSDT', 'i': '1m', 'f': 527449288, 'L': 527449503, 'o': '364.60000000', 'c': '364.30000000', 'h': '364.60000000', 'l': '364.20000000', 'v': '458.54400000', 'n': 216, 'x': False, 'q': '167076.68030000', 'V': '183.99400000', 'Q': '67043.53500000', 'B': '0'}}
 {'e': 'kline', 'E': 1647220251279, 's': 'BNBUSDT', 'k': {'t': 1647220200000, 'T': 1647220259999, 's': 'BNBUSDT', 'i': '1m', 'f': 527449288, 'L': 527449507, 'o': '364.60000000', 'c': '364.30000000', 'h': '364.60000000', 'l': '364.20000000', 'v': '460.67000000', 'n': 220, 'x': False, 'q': '167851.03680000', 'V': '184.66700000', 'Q': '67288.70890000', 'B': '0'}}
 {'e': 'kline', 'E': 1647220253583, 's': 'BNBUSDT', 'k': {'t': 1647220200000, 'T': 1647220259999, 's': 'BNBUSDT', 'i': '1m', 'f': 527449288, 'L': 527449513, 'o': '364.60000000', 'c': '364.20000000', 'h': '364.60000000', 'l': '364.20000000', 'v': '461.78000000', 'n': 226, 'x': False, 'q': '168255.38670000', 'V': '185.54600000', 'Q': '67608.92860000', 'B': '0'}}
 Connection closed
-{% endhighlight %}
+```
 
 ### Futher explore the API
 
 Previous step works fine with a single symbol, what if in the websocket I need data from more symbol or even in any websockets ?? 
 The websockert API kindly offers subscription mode, with which you can subscribe multiple symbols and get the data back within the same websocket connection. refer to the following code for this:
 
-{% highlight python linenos %}
+```python
 import json
 import websocket
 
@@ -112,14 +112,14 @@ while True:
     on_message(result)
 
 ws.close()
-{% endhighlight %}
+```
 
 ### Quick explanation
 
 Line 6-17 creates a websocket connection, the first action is to send a message to endpoint to subscribe to steams that are of interests. 
 The playload of the subscription is like this:
 
-{% highlight json linenos %}
+```json
 {
   "method": "SUBSCRIBE",
   "params": [
@@ -131,26 +131,26 @@ The playload of the subscription is like this:
   ],
   "id": 1
 }
-{% endhighlight %}
+```
 
 According to the [API doc](https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-streams.md#live-subscribingunsubscribing-to-streams), the response of the first ws.sent(payload) call is 
 
-{% highlight json linenos %}
+```json
 {
   "result": null,
   "id": 1
 }
-{% endhighlight %}
+```
 
 When we inspect the console output when running the above python code we also get the following which indicates we are NOT doing something crazy !
 
-{% highlight json linenos %}
+```json
 (venv) λ python run.py
 {'result': None, 'id': 1}
 {'e': 'kline', 'E': 1647220380568, 's': 'XRPUSDT', 'k': {'t': 1647220320000, 'T': 1647220379999, 's': 'XRPUSDT', 'i': '1m', 'f': 429501724, 'L': 429501859, 'o': '0.75860000', 'c': '0.75920000', 'h': '0.75920000', 'l': '0.75860000', 'v': '81089.00000000', 'n': 136, 'x': True, 'q': '61541.60570000', 'V': '63081.00000000', 'Q': '47874.45210000', 'B': '0'}}
 {'e': 'kline', 'E': 1647220382238, 's': 'BTCUSDT', 'k': {'t': 1647220380000, 'T': 1647220439999, 's': 'BTCUSDT', 'i': '1m', 'f': 1291349545, 'L': 1291349561, 'o': '38183.79000000', 'c': '38183.79000000', 'h': '38183.80000000', 'l': '38183.79000000', 'v': '0.25519000', 'n': 17, 'x': False, 'q': '9744.12173000', 'V': '0.03599000', 'Q': '1374.23496200', 'B': '0'}}
 {'e': 'kline', 'E': 1647220382372, 's': 'BNBUSDT', 'k': {'t': 1647220380000, 'T': 1647220439999, 's': 'BNBUSDT', 'i': '1m', 'f': 527450005, 'L': 527450009, 'o': '363.80000000', 'c': '363.70000000', 'h': '363.80000000', 'l': '363.70000000', 'v': '2.58200000', 'n': 5, 'x': False, 'q': '939.30620000', 'V': '2.32800000', 'Q': '846.92640000', 'B': '0'}}
-{% endhighlight %}
+```
 
 As you could see from the screenshot, the first response from the server is the acknowledgement of the subscription.
 The data following the acknowledgement is the data for the symbols(remember the crypto trading jargon?), and indead we are receiving data for all the symbols we have subscribed to !
@@ -161,7 +161,7 @@ To start with part, first we want to add prometheus client to our code so that w
 
 Recall the follow symbol data output from our previous step:
 
-{% highlight json linenos %}
+```json
 {
   "e": "kline",     // Event type
   "E": 123456789,   // Event time
@@ -186,24 +186,24 @@ Recall the follow symbol data output from our previous step:
     "B": "123456"   // Ignore
   }
 }
-{% endhighlight %}
+```
 
 With reference to the [doc](https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-streams.md#klinecandlestick-streams), for our case we are interested in "l" and "h" in the "k" property for the low price and high price. Obviously we are interested in the "s" property as well for the name of the symbol.
 Once we understand what we need to do with our data, now it time to update the callback function accordingly to do our "analysis".
 Our analysis here is as simple as just reading some properties and this is not very important here as it is on the business side in the real world, our goal in this blog is to retrieve the data and send to Prometheus and we can just send some properties as if it is our "analysis". So let's go
 
-{% highlight python linenos %}
+```python
 def on_message(message):
     data = json.loads(message)
     if 'k' not in data:
       pass
     else:
       print(data['s'], data['k']['l'], data['k']['h'])
-{% endhighlight %}
+```
 
 Once call back function is updated we should see the following output that captures properties we are interested
 
-{% highlight python linenos %}
+```python
 (venv) λ python run.py
 BTCUSDT 38155.15000000 38170.16000000
 ETHUSDT 2534.36000000 2535.02000000
@@ -211,12 +211,12 @@ XRPUSDT 0.76010000 0.76040000
 BNBUSDT 364.40000000 364.50000000
 DOGEUSDT 0.11180000 0.11180000
 BTCUSDT 38153.01000000 38170.16000000
-{% endhighlight %}
+```
 
 Now lets start ingesting data to Prometheus using [prometheus-client](https://pypi.org/project/prometheus-client).
 Obviously we can spent our whole night trying to understand the nitty gritty of prometheus-client, but that is not the purpose right ? Our purpose here is to the things going end to end from websocket to prometheus. So let's grab just what we need for this excercise ! 
 
-{% highlight python linenos %}
+```python
 import json
 import websocket
 from prometheus_client import Gauge, start_http_server
@@ -232,7 +232,7 @@ def on_message(message):
       print(data['s'], data['k']['l'], data['k']['h'])
       g.labels(f"{data['s']}-high").set(data['k']['h'])
       g.labels(f"{data['s']}-low").set(data['k']['l'])
-{% endhighlight%}
+```
 
 ### Quick explanation
 Line 5 create a Gauge object, a Guage is a type of metrics to record a value. Like mentioned before there are other types of metrics worth exploring, sounds like a place to spend our "tech time".
@@ -242,7 +242,7 @@ Line 6 create a Prometheus endpoint where you could see the metrics at http://lo
 When you run python code with above updates, you could start the metrics endpoint from http://localhost:8080 and see the following output. When you refresh the page you should be able to see symbol high and low price being updated!
 yay ! 😀
 
-{% highlight python linenos %}
+```bash
 # HELP python_gc_objects_collected_total Objects collected during gc
 # TYPE python_gc_objects_collected_total counter
 python_gc_objects_collected_total{generation="0"} 311.0
@@ -273,14 +273,14 @@ SymbolPrice{symbols="BTCUSDT-high"} 37984.81
 SymbolPrice{symbols="BTCUSDT-low"} 37971.19
 SymbolPrice{symbols="DOGEUSDT-high"} 0.1113
 SymbolPrice{symbols="DOGEUSDT-low"} 0.1112
-{% endhighlight %}
-
+```
+<br>
 ## Part 4. Create Prometheus server and receive metrics data for visualization
 In this part you will need docker installed for creating Prometheus server in container. Please refer to official [documentation](https://prometheus.io/docs/prometheus/latest/installation/) for setup. 
 
 Obvioiusly you could run docker cmd for this, I have also got a docker-compose.yml here as well.
 
-{% highlight yaml linenos %}
+```yml
 version: '3.9'
 services:
   prometheus:
@@ -289,11 +289,11 @@ services:
       - "9090:9090"
     volumes:
       - /pathofown/prometheus.yml:/etc/prometheus/prometheus.yml
-{% endhighlight %}
+```
 
 Before running this you will also need a prometheus configuration file with the name of "prometheus.yml", in a nutshell in this file you will specify the metrics endpoint from where the server is going to collect data from. When running the Prometheus container, you need to mount the [volume](https://docs.docker.com/storage/volumes/) for you Prometheus container so that this config file is place in "/etc/prometheus/prometheus.yml" at container runtime.
 
-{% highlight yaml linenos %}
+```yml
 global:
   scrape_interval:     5s
   evaluation_interval: 5s
@@ -305,7 +305,7 @@ scrape_configs:
   - job_name: 'TestJob'
     static_configs:
       - targets: ['host.docker.internal:8000']
-{% endhighlight %}
+```
 
 ### Quick explanation
 Line 8 specifies the port of Prometheus server running locally

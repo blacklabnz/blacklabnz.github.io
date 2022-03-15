@@ -19,3 +19,9 @@ url: https://blacklabnz.github.io
 plugins:
   - jekyll-seo-tag
   - jekyll-sitemap
+
+kramdown:
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    block:
+      line_numbers: true
