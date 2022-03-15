@@ -12,8 +12,8 @@ body {
 .social-icons {
   margin-left: auto;
   margin-right: auto;
-  margin-top: 50px;
-  margin-bottom: 50px;
+  margin-top: 20px;
+  margin-bottom: 20px;
 }
 
 .social-icons a {
@@ -224,6 +224,13 @@ pre {
   border-radius: 5px;
   // border: 1px solid #595959;
   overflow-x: auto;
+  -ms-overflow-style: none;  /* hide scroll bar IE and Edge */
+  scrollbar-width: none;  /* hide scroll bar Firefox */
+}
+
+/*hide scroll bar firefox*/
+pre::-webkit-scrollbar {
+  display: none;
 }
 
 table {
@@ -496,7 +503,7 @@ footer {
   margin-left: auto;
   margin-top: 20px;
   margin-bottom: 20px;
-  width: 50%;
+  width: 110px;
 }
 
 .vertical-menu a {
@@ -508,7 +515,7 @@ footer {
   text-decoration: none;
   font-family: 'Nunito Sans', sans-serif;
   font-weight: 600;
-  font-size: 20px;
+  font-size: 15px;
   margin: 20px 0px 20px 0px;
 }
 
