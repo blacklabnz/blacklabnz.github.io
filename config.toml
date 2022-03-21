@@ -1,4 +1,4 @@
-baseURL = 'https://blacklabnz.github.io'
+baseURL = 'https://blacklabnz.github.io/'
 languageCode = 'en-us'
 title = 'blacklabnz'
 theme = 'newtheme'
