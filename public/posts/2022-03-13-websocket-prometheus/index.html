@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    
+      <title>
+        Consume Websocket stream and send to Prometheus in Python ::
+        blacklab — DevOps | Data
+      </title>
+    
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta
+  name="description"
+  content="Recently I was tasked with consuming data from websocket, analyse it and then send data to Prometheus. The theory is pretty straight forward: getting data from websocket API in a stream and analyse and take the data points and send it to prometheus for visulization. In this blog you will have all the steps and code needed to reporduce this flow.
+"
+/>
+<meta
+  name="keywords"
+  content=""
+/>
+<meta name="robots" content="noodp" />
+<link rel="canonical" href="http://example.org/posts/2022-03-13-websocket-prometheus/" />
+
+
+
+
+
+<link rel="stylesheet" href="http://example.org/assets/style.css" />
+
+<link rel="stylesheet" href="http://example.org/style.css" />
+
+
+<link
+  rel="apple-touch-icon-precomposed"
+  sizes="144x144"
+  href="http://example.org/img/apple-touch-icon-144-precomposed.png"
+/>
+<link rel="shortcut icon" href="http://example.org/img/favicon.png" />
+
+
+<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css integrity="sha256-+N4/V/SbAFiW1MPBCXnfnP9QSN3+Keu+NlB+0ev/YKQ=" crossorigin=anonymous>
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Consume Websocket stream and send to Prometheus in Python"/>
+<meta name="twitter:description" content="Recently I was tasked with consuming data from websocket, analyse it and then send data to Prometheus.
+The theory is pretty straight forward: getting data from websocket API in a stream and analyse and take the data points and send it to prometheus for visulization.
+In this blog you will have all the steps and code needed to reporduce this flow."/>
+
+
+
+<meta property="og:title" content="Consume Websocket stream and send to Prometheus in Python" />
+<meta property="og:description" content="Recently I was tasked with consuming data from websocket, analyse it and then send data to Prometheus.
+The theory is pretty straight forward: getting data from websocket API in a stream and analyse and take the data points and send it to prometheus for visulization.
+In this blog you will have all the steps and code needed to reporduce this flow." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://example.org/posts/2022-03-13-websocket-prometheus/" /><meta property="article:section" content="posts" />
+
+<meta property="og:site_name" content="blacklab" />
+
+
+
+
+
+
+
+  </head>
+  <body class="dark-theme">
+    <div class="container">
+      <header class="header">
+  <span class="header__inner">
+    <a
+  href="/"
+  class="logo"
+  style="text-decoration: none;"
+>
+  
+    <span class="logo__mark"><i class="fas fa-terminal"></i></span>
+    <span class="logo__text">
+      blacklabnz
+    </span>
+    <span class="logo__cursor"></span>
+  
+</a>
+
+    <span class="header__right">
+      
+        <nav class="menu">
+  <ul class="menu__inner menu__inner--desktop">
+    
+    
+    
+    <li><a href="/about">About</a></li>
+    
+    
+    
+    <ul class="menu__sub-inner">
+      <li class="menu__sub-inner-more-trigger">
+        More
+        <span class="menu__sub-inner-more-trigger-icon"><i class="fas fa-chevron-down"></i></span>
+      </li>
+      <ul class="menu__sub-inner-more hidden">
+        
+        
+        <li><a href="/showcase">Showcase</a></li>
+        
+        
+      </ul>
+    </ul>
+    
+    
+  </ul>
+
+  <ul class="menu__inner menu__inner--mobile">
+    
+    
+    <li><a href="/about">About</a></li>
+    
+    
+    
+    <li><a href="/showcase">Showcase</a></li>
+    
+    
+  </ul>
+</nav>
+        <span class="menu-trigger">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M0 0h24v24H0z" fill="none" />
+            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
+          </svg>
+        </span>
+      
+      <span class="theme-toggle">
+        <svg
+  class="theme-toggler"
+  width="24"
+  height="24"
+  viewBox="0 0 48 48"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    d="M22 41C32.4934 41 41 32.4934 41 22C41 11.5066 32.4934 3 22
+  3C11.5066 3 3 11.5066 3 22C3 32.4934 11.5066 41 22 41ZM7 22C7
+  13.7157 13.7157 7 22 7V37C13.7157 37 7 30.2843 7 22Z"
+  />
+</svg>
+
+      </span>
+    </span>
+  </span>
+</header>
+
+
+      <div class="content">
+        
+  
+  
+
+  <div class="post">
+    <h1 class="post-title">Consume Websocket stream and send to Prometheus in Python</h1>
+    <div class="post-meta">
+      
+
+      
+
+
+      
+    </div>
+
+    
+
+    
+
+    <div class="post-content">
+      
+      <p>Recently I was tasked with consuming data from websocket, analyse it and then send data to Prometheus.
+The theory is pretty straight forward: getting data from websocket API in a stream and analyse and take the data points and send it to prometheus for visulization.
+In this blog you will have all the steps and code needed to reporduce this flow.</p>
+<p>With this in mind, I decided using python to achieve all these.</p>
+<ul>
+<li>TOC
+{:toc}</li>
+</ul>
+<h2 id="part-1-websocket-vs-rest-reminder">Part 1. Websocket VS Rest reminder</h2>
+<p>Before we start, I would like to have a bit of revision on Websocket API and how it is different from REST API</p>
+<p>![websocketvsrest](/assets/blog_images/{{ page.slug }}/websocketvsrest.png)</p>
+<p>The diagram I took from internet explains it quite well. In simple term, you interact with REST API with a request and response fashion wheraes in websocket there is a two way connection established during interaction lifecycle therefore you dont need to constantly send request to server for retrieving data. At the end of the interaction, the two way connection is close.</p>
+<h2 id="part-2-consuming-a-websocket-api">Part 2. Consuming a websocket API</h2>
+<p>You could easily find some publicly availabel websocket API, the one I used for this blog is from Binance, one of the platform used by coin traders. Though myself is not doing any coin trading nor receiving any sponsorship from them. 
+They have very detailed API documentation on their <a href="https://github.com/binance/binance-spot-api-docs">Spot API</a>.</p>
+<p>The following code snippet can be used to connect to websocket API:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> json
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> websocket
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>socket <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;wss://stream.binance.com:9443/ws/bnbusdt@kline_1m&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">on_message</span>(ws, message):
+</span></span><span style="display:flex;"><span>    data <span style="color:#f92672">=</span> json<span style="color:#f92672">.</span>loads(message)
+</span></span><span style="display:flex;"><span>    print(data)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">on_error</span>(ws, error):
+</span></span><span style="display:flex;"><span>    print(error)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">on_close</span>(ws, close_status_code, close_msg):
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#34;Connection closed&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">on_open</span>(ws):
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#34;Opened connection&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>ws <span style="color:#f92672">=</span> websocket<span style="color:#f92672">.</span>WebSocketApp(
+</span></span><span style="display:flex;"><span>    socket, 
+</span></span><span style="display:flex;"><span>    on_open<span style="color:#f92672">=</span>on_open, 
+</span></span><span style="display:flex;"><span>    on_message<span style="color:#f92672">=</span>on_message, 
+</span></span><span style="display:flex;"><span>    on_error<span style="color:#f92672">=</span>on_error, 
+</span></span><span style="display:flex;"><span>    on_close<span style="color:#f92672">=</span>on_close )
+</span></span><span style="display:flex;"><span>ws<span style="color:#f92672">.</span>run_forever()
+</span></span></code></pre></div><h3 id="quick-explanation">Quick explanation</h3>
+<p>Line 4 defines the websocket url, the details of this endpoint can be found <a href="https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-streams.md#klinecandlestick-streams">here</a>.
+&ldquo;/bnbusdt@kline_1m&rdquo; means retrieving data from the kline stream for bnb vs usdt, what is so called a symbol, these are cyrypto coin terminologies which you can fine richer explanations else where.</p>
+<p>Line 6 to line 17 defines the callback function with minimal functionality when message is received from the server.
+More details can be found in <a href="https://websocket-client.readthedocs.io/en/latest/">websocket-client</a> official documentation.</p>
+<p>Line 19 and 10 creates a websocket instance and start connection and run forever.</p>
+<p>Run the above python code will give you this console output:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>(venv) λ python run<span style="color:#f92672">.</span>py
+</span></span><span style="display:flex;"><span>Opened connection
+</span></span><span style="display:flex;"><span>{<span style="color:#e6db74">&#34;e&#34;</span>: <span style="color:#e6db74">&#34;kline&#34;</span>, <span style="color:#e6db74">&#34;E&#34;</span>: <span style="color:#ae81ff">1647220248756</span>, <span style="color:#e6db74">&#34;s&#34;</span>: <span style="color:#e6db74">&#34;BNBUSDT&#34;</span>, <span style="color:#e6db74">&#34;k&#34;</span>: {<span style="color:#e6db74">&#34;t&#34;</span>: <span style="color:#ae81ff">1647220200000</span>, <span style="color:#e6db74">&#34;T&#34;</span>: <span style="color:#ae81ff">1647220259999</span>, <span style="color:#e6db74">&#34;s&#34;</span>: <span style="color:#e6db74">&#34;BNBUSDT&#34;</span>, <span style="color:#e6db74">&#34;i&#34;</span>: <span style="color:#e6db74">&#34;1m&#34;</span>, <span style="color:#e6db74">&#34;f&#34;</span>: <span style="color:#ae81ff">527449288</span>, <span style="color:#e6db74">&#34;L&#34;</span>: <span style="color:#ae81ff">527449503</span>, <span style="color:#e6db74">&#34;o&#34;</span>: <span style="color:#e6db74">&#34;364.60000000&#34;</span>, <span style="color:#e6db74">&#34;c&#34;</span>: <span style="color:#e6db74">&#34;364.30000000&#34;</span>, <span style="color:#e6db74">&#34;h&#34;</span>: <span style="color:#e6db74">&#34;364.60000000&#34;</span>, <span style="color:#e6db74">&#34;l&#34;</span>: <span style="color:#e6db74">&#34;364.20000000&#34;</span>, <span style="color:#e6db74">&#34;v&#34;</span>: <span style="color:#e6db74">&#34;458.54400000&#34;</span>, <span style="color:#e6db74">&#34;n&#34;</span>: <span style="color:#ae81ff">216</span>, <span style="color:#e6db74">&#34;x&#34;</span>: <span style="color:#66d9ef">False</span>, <span style="color:#e6db74">&#34;q&#34;</span>: <span style="color:#e6db74">&#34;167076.68030000&#34;</span>, <span style="color:#e6db74">&#34;V&#34;</span>: <span style="color:#e6db74">&#34;183.99400000&#34;</span>, <span style="color:#e6db74">&#34;Q&#34;</span>: <span style="color:#e6db74">&#34;67043.53500000&#34;</span>, <span style="color:#e6db74">&#34;B&#34;</span>: <span style="color:#e6db74">&#34;0&#34;</span>}}
+</span></span><span style="display:flex;"><span>{<span style="color:#e6db74">&#34;e&#34;</span>: <span style="color:#e6db74">&#34;kline&#34;</span>, <span style="color:#e6db74">&#34;E&#34;</span>: <span style="color:#ae81ff">1647220251279</span>, <span style="color:#e6db74">&#34;s&#34;</span>: <span style="color:#e6db74">&#34;BNBUSDT&#34;</span>, <span style="color:#e6db74">&#34;k&#34;</span>: {<span style="color:#e6db74">&#34;t&#34;</span>: <span style="color:#ae81ff">1647220200000</span>, <span style="color:#e6db74">&#34;T&#34;</span>: <span style="color:#ae81ff">1647220259999</span>, <span style="color:#e6db74">&#34;s&#34;</span>: <span style="color:#e6db74">&#34;BNBUSDT&#34;</span>, <span style="color:#e6db74">&#34;i&#34;</span>: <span style="color:#e6db74">&#34;1m&#34;</span>, <span style="color:#e6db74">&#34;f&#34;</span>: <span style="color:#ae81ff">527449288</span>, <span style="color:#e6db74">&#34;L&#34;</span>: <span style="color:#ae81ff">527449507</span>, <span style="color:#e6db74">&#34;o&#34;</span>: <span style="color:#e6db74">&#34;364.60000000&#34;</span>, <span style="color:#e6db74">&#34;c&#34;</span>: <span style="color:#e6db74">&#34;364.30000000&#34;</span>, <span style="color:#e6db74">&#34;h&#34;</span>: <span style="color:#e6db74">&#34;364.60000000&#34;</span>, <span style="color:#e6db74">&#34;l&#34;</span>: <span style="color:#e6db74">&#34;364.20000000&#34;</span>, <span style="color:#e6db74">&#34;v&#34;</span>: <span style="color:#e6db74">&#34;460.67000000&#34;</span>, <span style="color:#e6db74">&#34;n&#34;</span>: <span style="color:#ae81ff">220</span>, <span style="color:#e6db74">&#34;x&#34;</span>: <span style="color:#66d9ef">False</span>, <span style="color:#e6db74">&#34;q&#34;</span>: <span style="color:#e6db74">&#34;167851.03680000&#34;</span>, <span style="color:#e6db74">&#34;V&#34;</span>: <span style="color:#e6db74">&#34;184.66700000&#34;</span>, <span style="color:#e6db74">&#34;Q&#34;</span>: <span style="color:#e6db74">&#34;67288.70890000&#34;</span>, <span style="color:#e6db74">&#34;B&#34;</span>: <span style="color:#e6db74">&#34;0&#34;</span>}}
+</span></span><span style="display:flex;"><span>{<span style="color:#e6db74">&#34;e&#34;</span>: <span style="color:#e6db74">&#34;kline&#34;</span>, <span style="color:#e6db74">&#34;E&#34;</span>: <span style="color:#ae81ff">1647220253583</span>, <span style="color:#e6db74">&#34;s&#34;</span>: <span style="color:#e6db74">&#34;BNBUSDT&#34;</span>, <span style="color:#e6db74">&#34;k&#34;</span>: {<span style="color:#e6db74">&#34;t&#34;</span>: <span style="color:#ae81ff">1647220200000</span>, <span style="color:#e6db74">&#34;T&#34;</span>: <span style="color:#ae81ff">1647220259999</span>, <span style="color:#e6db74">&#34;s&#34;</span>: <span style="color:#e6db74">&#34;BNBUSDT&#34;</span>, <span style="color:#e6db74">&#34;i&#34;</span>: <span style="color:#e6db74">&#34;1m&#34;</span>, <span style="color:#e6db74">&#34;f&#34;</span>: <span style="color:#ae81ff">527449288</span>, <span style="color:#e6db74">&#34;L&#34;</span>: <span style="color:#ae81ff">527449513</span>, <span style="color:#e6db74">&#34;o&#34;</span>: <span style="color:#e6db74">&#34;364.60000000&#34;</span>, <span style="color:#e6db74">&#34;c&#34;</span>: <span style="color:#e6db74">&#34;364.20000000&#34;</span>, <span style="color:#e6db74">&#34;h&#34;</span>: <span style="color:#e6db74">&#34;364.60000000&#34;</span>, <span style="color:#e6db74">&#34;l&#34;</span>: <span style="color:#e6db74">&#34;364.20000000&#34;</span>, <span style="color:#e6db74">&#34;v&#34;</span>: <span style="color:#e6db74">&#34;461.78000000&#34;</span>, <span style="color:#e6db74">&#34;n&#34;</span>: <span style="color:#ae81ff">226</span>, <span style="color:#e6db74">&#34;x&#34;</span>: <span style="color:#66d9ef">False</span>, <span style="color:#e6db74">&#34;q&#34;</span>: <span style="color:#e6db74">&#34;168255.38670000&#34;</span>, <span style="color:#e6db74">&#34;V&#34;</span>: <span style="color:#e6db74">&#34;185.54600000&#34;</span>, <span style="color:#e6db74">&#34;Q&#34;</span>: <span style="color:#e6db74">&#34;67608.92860000&#34;</span>, <span style="color:#e6db74">&#34;B&#34;</span>: <span style="color:#e6db74">&#34;0&#34;</span>}}
+</span></span><span style="display:flex;"><span>Connection closed
+</span></span></code></pre></div><h3 id="futher-explore-the-api">Futher explore the API</h3>
+<p>Previous step works fine with a single symbol, what if in the websocket I need data from more symbol or even in any websockets ?? 
+The websockert API kindly offers subscription mode, with which you can subscribe multiple symbols and get the data back within the same websocket connection. refer to the following code for this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> json
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> websocket
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>socket <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;wss://stream.binance.com:9443/ws&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>ws <span style="color:#f92672">=</span> websocket<span style="color:#f92672">.</span>create_connection(socket)
+</span></span><span style="display:flex;"><span>ws<span style="color:#f92672">.</span>send(json<span style="color:#f92672">.</span>dumps({
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;method&#34;</span>: <span style="color:#e6db74">&#34;SUBSCRIBE&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;params&#34;</span>: [
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;btcusdt@kline_1m&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;bnbusdt@kline_1m&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;ethusdt@kline_1m&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;dogeusdt@kline_1m&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;xrpusdt@kline_1m&#34;</span>
+</span></span><span style="display:flex;"><span>  ],
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;id&#34;</span>: <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>}))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">on_message</span>(message):
+</span></span><span style="display:flex;"><span>    data <span style="color:#f92672">=</span> json<span style="color:#f92672">.</span>loads(message)
+</span></span><span style="display:flex;"><span>    print(data)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">while</span> <span style="color:#66d9ef">True</span>:
+</span></span><span style="display:flex;"><span>    result <span style="color:#f92672">=</span> ws<span style="color:#f92672">.</span>recv()
+</span></span><span style="display:flex;"><span>    on_message(result)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>ws<span style="color:#f92672">.</span>close()
+</span></span></code></pre></div><h3 id="quick-explanation-1">Quick explanation</h3>
+<p>Line 6-17 creates a websocket connection, the first action is to send a message to endpoint to subscribe to steams that are of interests. 
+The playload of the subscription is like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;method&#34;</span>: <span style="color:#e6db74">&#34;SUBSCRIBE&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;params&#34;</span>: [
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;btcusdt@kline_1m&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;bnbusdt@kline_1m&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;ethusdt@kline_1m&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;dogeusdt@kline_1m&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;xrpusdt@kline_1m&#34;</span>
+</span></span><span style="display:flex;"><span>  ],
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;id&#34;</span>: <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>According to the <a href="https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-streams.md#live-subscribingunsubscribing-to-streams">API doc</a>, the response of the first ws.sent(payload) call is</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;result&#34;</span>: <span style="color:#66d9ef">null</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;id&#34;</span>: <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>When we inspect the console output when running the above python code we also get the following which indicates we are NOT doing something crazy !</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{<span style="color:#f92672">&#34;result&#34;</span>: <span style="color:#e6db74">&#34;None&#34;</span>, <span style="color:#f92672">&#34;id&#34;</span>: <span style="color:#ae81ff">1</span>}
+</span></span><span style="display:flex;"><span>{<span style="color:#f92672">&#34;e&#34;</span>: <span style="color:#e6db74">&#34;kline&#34;</span>, <span style="color:#f92672">&#34;E&#34;</span>: <span style="color:#ae81ff">1647220380568</span>, <span style="color:#f92672">&#34;s&#34;</span>: <span style="color:#e6db74">&#34;XRPUSDT&#34;</span>, <span style="color:#f92672">&#34;k&#34;</span>: {<span style="color:#f92672">&#34;t&#34;</span>: <span style="color:#ae81ff">1647220320000</span>, <span style="color:#f92672">&#34;T&#34;</span>: <span style="color:#ae81ff">1647220379999</span>, <span style="color:#f92672">&#34;s&#34;</span>: <span style="color:#e6db74">&#34;XRPUSDT&#34;</span>, <span style="color:#f92672">&#34;i&#34;</span>: <span style="color:#e6db74">&#34;1m&#34;</span>, <span style="color:#f92672">&#34;f&#34;</span>: <span style="color:#ae81ff">429501724</span>, <span style="color:#f92672">&#34;L&#34;</span>: <span style="color:#ae81ff">429501859</span>, <span style="color:#f92672">&#34;o&#34;</span>: <span style="color:#e6db74">&#34;0.75860000&#34;</span>, <span style="color:#f92672">&#34;c&#34;</span>: <span style="color:#e6db74">&#34;0.75920000&#34;</span>, <span style="color:#f92672">&#34;h&#34;</span>: <span style="color:#e6db74">&#34;0.75920000&#34;</span>, <span style="color:#f92672">&#34;l&#34;</span>: <span style="color:#e6db74">&#34;0.75860000&#34;</span>, <span style="color:#f92672">&#34;v&#34;</span>: <span style="color:#e6db74">&#34;81089.00000000&#34;</span>, <span style="color:#f92672">&#34;n&#34;</span>: <span style="color:#ae81ff">136</span>, <span style="color:#f92672">&#34;x&#34;</span>: <span style="color:#960050;background-color:#1e0010">True</span>, <span style="color:#f92672">&#34;q&#34;</span>: <span style="color:#e6db74">&#34;61541.60570000&#34;</span>, <span style="color:#f92672">&#34;V&#34;</span>: <span style="color:#e6db74">&#34;63081.00000000&#34;</span>, <span style="color:#f92672">&#34;Q&#34;</span>: <span style="color:#e6db74">&#34;47874.45210000&#34;</span>, <span style="color:#f92672">&#34;B&#34;</span>: <span style="color:#e6db74">&#34;0&#34;</span>}}
+</span></span><span style="display:flex;"><span>{<span style="color:#f92672">&#34;e&#34;</span>: <span style="color:#e6db74">&#34;kline&#34;</span>, <span style="color:#f92672">&#34;E&#34;</span>: <span style="color:#ae81ff">1647220382238</span>, <span style="color:#f92672">&#34;s&#34;</span>: <span style="color:#e6db74">&#34;BTCUSDT&#34;</span>, <span style="color:#f92672">&#34;k&#34;</span>: {<span style="color:#f92672">&#34;t&#34;</span>: <span style="color:#ae81ff">1647220380000</span>, <span style="color:#f92672">&#34;T&#34;</span>: <span style="color:#ae81ff">1647220439999</span>, <span style="color:#f92672">&#34;s&#34;</span>: <span style="color:#e6db74">&#34;BTCUSDT&#34;</span>, <span style="color:#f92672">&#34;i&#34;</span>: <span style="color:#e6db74">&#34;1m&#34;</span>, <span style="color:#f92672">&#34;f&#34;</span>: <span style="color:#ae81ff">1291349545</span>, <span style="color:#f92672">&#34;L&#34;</span>: <span style="color:#ae81ff">1291349561</span>, <span style="color:#f92672">&#34;o&#34;</span>: <span style="color:#e6db74">&#34;38183.79000000&#34;</span>, <span style="color:#f92672">&#34;c&#34;</span>: <span style="color:#e6db74">&#34;38183.79000000&#34;</span>, <span style="color:#f92672">&#34;h&#34;</span>: <span style="color:#e6db74">&#34;38183.80000000&#34;</span>, <span style="color:#f92672">&#34;l&#34;</span>: <span style="color:#e6db74">&#34;38183.79000000&#34;</span>, <span style="color:#f92672">&#34;v&#34;</span>: <span style="color:#e6db74">&#34;0.25519000&#34;</span>, <span style="color:#f92672">&#34;n&#34;</span>: <span style="color:#ae81ff">17</span>, <span style="color:#f92672">&#34;x&#34;</span>: <span style="color:#960050;background-color:#1e0010">False</span>, <span style="color:#f92672">&#34;q&#34;</span>: <span style="color:#e6db74">&#34;9744.12173000&#34;</span>, <span style="color:#f92672">&#34;V&#34;</span>: <span style="color:#e6db74">&#34;0.03599000&#34;</span>, <span style="color:#f92672">&#34;Q&#34;</span>: <span style="color:#e6db74">&#34;1374.23496200&#34;</span>, <span style="color:#f92672">&#34;B&#34;</span>: <span style="color:#e6db74">&#34;0&#34;</span>}}
+</span></span><span style="display:flex;"><span>{<span style="color:#f92672">&#34;e&#34;</span>: <span style="color:#e6db74">&#34;kline&#34;</span>, <span style="color:#f92672">&#34;E&#34;</span>: <span style="color:#ae81ff">1647220382372</span>, <span style="color:#f92672">&#34;s&#34;</span>: <span style="color:#e6db74">&#34;BNBUSDT&#34;</span>, <span style="color:#f92672">&#34;k&#34;</span>: {<span style="color:#f92672">&#34;t&#34;</span>: <span style="color:#ae81ff">1647220380000</span>, <span style="color:#f92672">&#34;T&#34;</span>: <span style="color:#ae81ff">1647220439999</span>, <span style="color:#f92672">&#34;s&#34;</span>: <span style="color:#e6db74">&#34;BNBUSDT&#34;</span>, <span style="color:#f92672">&#34;i&#34;</span>: <span style="color:#e6db74">&#34;1m&#34;</span>, <span style="color:#f92672">&#34;f&#34;</span>: <span style="color:#ae81ff">527450005</span>, <span style="color:#f92672">&#34;L&#34;</span>: <span style="color:#ae81ff">527450009</span>, <span style="color:#f92672">&#34;o&#34;</span>: <span style="color:#e6db74">&#34;363.80000000&#34;</span>, <span style="color:#f92672">&#34;c&#34;</span>: <span style="color:#e6db74">&#34;363.70000000&#34;</span>, <span style="color:#f92672">&#34;h&#34;</span>: <span style="color:#e6db74">&#34;363.80000000&#34;</span>, <span style="color:#f92672">&#34;l&#34;</span>: <span style="color:#e6db74">&#34;363.70000000&#34;</span>, <span style="color:#f92672">&#34;v&#34;</span>: <span style="color:#e6db74">&#34;2.58200000&#34;</span>, <span style="color:#f92672">&#34;n&#34;</span>: <span style="color:#ae81ff">5</span>, <span style="color:#f92672">&#34;x&#34;</span>: <span style="color:#960050;background-color:#1e0010">False</span>, <span style="color:#f92672">&#34;q&#34;</span>: <span style="color:#e6db74">&#34;939.30620000&#34;</span>, <span style="color:#f92672">&#34;V&#34;</span>: <span style="color:#e6db74">&#34;2.32800000&#34;</span>, <span style="color:#f92672">&#34;Q&#34;</span>: <span style="color:#e6db74">&#34;846.92640000&#34;</span>, <span style="color:#f92672">&#34;B&#34;</span>: <span style="color:#e6db74">&#34;0&#34;</span>}}
+</span></span></code></pre></div><p>As you could see from the screenshot, the first response from the server is the acknowledgement of the subscription.
+The data following the acknowledgement is the data for the symbols(remember the crypto trading jargon?), and indead we are receiving data for all the symbols we have subscribed to !</p>
+<h2 id="part-3-add-prometheus-client-and-create-metric-endpiont">Part 3. Add prometheus-client and create metric endpiont</h2>
+<p>To start with part, first we want to add prometheus client to our code so that we could see metric being sent.</p>
+<p>Recall the follow symbol data output from our previous step:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;e&#34;</span>: <span style="color:#e6db74">&#34;kline&#34;</span>,     <span style="color:#75715e">// Event type
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#f92672">&#34;E&#34;</span>: <span style="color:#ae81ff">123456789</span>,   <span style="color:#75715e">// Event time
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#f92672">&#34;s&#34;</span>: <span style="color:#e6db74">&#34;BNBBTC&#34;</span>,    <span style="color:#75715e">// Symbol
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#f92672">&#34;k&#34;</span>: {
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;t&#34;</span>: <span style="color:#ae81ff">123400000</span>, <span style="color:#75715e">// Kline start time
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#f92672">&#34;T&#34;</span>: <span style="color:#ae81ff">123460000</span>, <span style="color:#75715e">// Kline close time
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#f92672">&#34;s&#34;</span>: <span style="color:#e6db74">&#34;BNBBTC&#34;</span>,  <span style="color:#75715e">// Symbol
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#f92672">&#34;i&#34;</span>: <span style="color:#e6db74">&#34;1m&#34;</span>,      <span style="color:#75715e">// Interval
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#f92672">&#34;f&#34;</span>: <span style="color:#ae81ff">100</span>,       <span style="color:#75715e">// First trade ID
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#f92672">&#34;L&#34;</span>: <span style="color:#ae81ff">200</span>,       <span style="color:#75715e">// Last trade ID
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#f92672">&#34;o&#34;</span>: <span style="color:#e6db74">&#34;0.0010&#34;</span>,  <span style="color:#75715e">// Open price
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#f92672">&#34;c&#34;</span>: <span style="color:#e6db74">&#34;0.0020&#34;</span>,  <span style="color:#75715e">// Close price
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#f92672">&#34;h&#34;</span>: <span style="color:#e6db74">&#34;0.0025&#34;</span>,  <span style="color:#75715e">// High price
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#f92672">&#34;l&#34;</span>: <span style="color:#e6db74">&#34;0.0015&#34;</span>,  <span style="color:#75715e">// Low price
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#f92672">&#34;v&#34;</span>: <span style="color:#e6db74">&#34;1000&#34;</span>,    <span style="color:#75715e">// Base asset volume
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#f92672">&#34;n&#34;</span>: <span style="color:#ae81ff">100</span>,       <span style="color:#75715e">// Number of trades
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#f92672">&#34;x&#34;</span>: <span style="color:#66d9ef">false</span>,     <span style="color:#75715e">// Is this kline closed?
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#f92672">&#34;q&#34;</span>: <span style="color:#e6db74">&#34;1.0000&#34;</span>,  <span style="color:#75715e">// Quote asset volume
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#f92672">&#34;V&#34;</span>: <span style="color:#e6db74">&#34;500&#34;</span>,     <span style="color:#75715e">// Taker buy base asset volume
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#f92672">&#34;Q&#34;</span>: <span style="color:#e6db74">&#34;0.500&#34;</span>,   <span style="color:#75715e">// Taker buy quote asset volume
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#f92672">&#34;B&#34;</span>: <span style="color:#e6db74">&#34;123456&#34;</span>   <span style="color:#75715e">// Ignore
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>With reference to the <a href="https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-streams.md#klinecandlestick-streams">doc</a>, for our case we are interested in &ldquo;l&rdquo; and &ldquo;h&rdquo; in the &ldquo;k&rdquo; property for the low price and high price. Obviously we are interested in the &ldquo;s&rdquo; property as well for the name of the symbol.
+Once we understand what we need to do with our data, now it time to update the callback function accordingly to do our &ldquo;analysis&rdquo;.
+Our analysis here is as simple as just reading some properties and this is not very important here as it is on the business side in the real world, our goal in this blog is to retrieve the data and send to Prometheus and we can just send some properties as if it is our &ldquo;analysis&rdquo;. So let&quot;s go</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">on_message</span>(message):
+</span></span><span style="display:flex;"><span>    data <span style="color:#f92672">=</span> json<span style="color:#f92672">.</span>loads(message)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> <span style="color:#e6db74">&#34;k&#34;</span> <span style="color:#f92672">not</span> <span style="color:#f92672">in</span> data:
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">pass</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>      print(data[<span style="color:#e6db74">&#34;s&#34;</span>], data[<span style="color:#e6db74">&#34;k&#34;</span>][<span style="color:#e6db74">&#34;l&#34;</span>], data[<span style="color:#e6db74">&#34;k&#34;</span>][<span style="color:#e6db74">&#34;h&#34;</span>])
+</span></span></code></pre></div><p>Once call back function is updated we should see the following output that captures properties we are interested</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>BTCUSDT <span style="color:#ae81ff">38155.15000000</span> <span style="color:#ae81ff">38170.16000000</span>
+</span></span><span style="display:flex;"><span>ETHUSDT <span style="color:#ae81ff">2534.36000000</span> <span style="color:#ae81ff">2535.02000000</span>
+</span></span><span style="display:flex;"><span>XRPUSDT <span style="color:#ae81ff">0.76010000</span> <span style="color:#ae81ff">0.76040000</span>
+</span></span><span style="display:flex;"><span>BNBUSDT <span style="color:#ae81ff">364.40000000</span> <span style="color:#ae81ff">364.50000000</span>
+</span></span><span style="display:flex;"><span>DOGEUSDT <span style="color:#ae81ff">0.11180000</span> <span style="color:#ae81ff">0.11180000</span>
+</span></span><span style="display:flex;"><span>BTCUSDT <span style="color:#ae81ff">38153.01000000</span> <span style="color:#ae81ff">38170.16000000</span>
+</span></span></code></pre></div><p>Now lets start ingesting data to Prometheus using <a href="https://pypi.org/project/prometheus-client">prometheus-client</a>.
+Obviously we can spent our whole night trying to understand the nitty gritty of prometheus-client, but that is not the purpose right ? Our purpose here is to the things going end to end from websocket to prometheus. So let&quot;s grab just what we need for this excercise !</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> json
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> websocket
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> prometheus_client <span style="color:#f92672">import</span> Gauge, start_http_server
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>g<span style="color:#f92672">=</span> Gauge(<span style="color:#e6db74">&#34;SymbolPrice&#34;</span>, <span style="color:#e6db74">&#34;Symbol high and low price&#34;</span>, [<span style="color:#e6db74">&#34;symbols&#34;</span>])
+</span></span><span style="display:flex;"><span>start_http_server(<span style="color:#ae81ff">8000</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">on_message</span>(message):
+</span></span><span style="display:flex;"><span>    data <span style="color:#f92672">=</span> json<span style="color:#f92672">.</span>loads(message)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> <span style="color:#e6db74">&#34;k&#34;</span> <span style="color:#f92672">not</span> <span style="color:#f92672">in</span> data:
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">pass</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>      print(data[<span style="color:#e6db74">&#34;s&#34;</span>], data[<span style="color:#e6db74">&#34;k&#34;</span>][<span style="color:#e6db74">&#34;l&#34;</span>], data[<span style="color:#e6db74">&#34;k&#34;</span>][<span style="color:#e6db74">&#34;h&#34;</span>])
+</span></span><span style="display:flex;"><span>      g<span style="color:#f92672">.</span>labels(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>data[<span style="color:#e6db74">&#34;s&#34;</span>]<span style="color:#e6db74">}</span><span style="color:#e6db74">-high&#34;</span>)<span style="color:#f92672">.</span>set(data[<span style="color:#e6db74">&#34;k&#34;</span>][<span style="color:#e6db74">&#34;h&#34;</span>])
+</span></span><span style="display:flex;"><span>      g<span style="color:#f92672">.</span>labels(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>data[<span style="color:#e6db74">&#34;s&#34;</span>]<span style="color:#e6db74">}</span><span style="color:#e6db74">-low&#34;</span>)<span style="color:#f92672">.</span>set(data[<span style="color:#e6db74">&#34;k&#34;</span>][<span style="color:#e6db74">&#34;l&#34;</span>])
+</span></span></code></pre></div><h3 id="quick-explanation-2">Quick explanation</h3>
+<p>Line 5 create a Gauge object, a Guage is a type of metrics to record a value. Like mentioned before there are other types of metrics worth exploring, sounds like a place to spend our &ldquo;tech time&rdquo;.</p>
+<p>Line 6 create a Prometheus endpoint where you could see the metrics at http://localhost:8080.</p>
+<p>When you run python code with above updates, you could start the metrics endpoint from http://localhost:8080 and see the following output. When you refresh the page you should be able to see symbol high and low price being updated!
+yay ! 😀</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># HELP python_gc_objects_collected_total Objects collected during gc</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># TYPE python_gc_objects_collected_total counter</span>
+</span></span><span style="display:flex;"><span>python_gc_objects_collected_total<span style="color:#f92672">{</span>generation<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;0&#34;</span><span style="color:#f92672">}</span> 311.0
+</span></span><span style="display:flex;"><span>python_gc_objects_collected_total<span style="color:#f92672">{</span>generation<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;1&#34;</span><span style="color:#f92672">}</span> 71.0
+</span></span><span style="display:flex;"><span>python_gc_objects_collected_total<span style="color:#f92672">{</span>generation<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;2&#34;</span><span style="color:#f92672">}</span> 0.0
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># HELP python_gc_objects_uncollectable_total Uncollectable object found during GC</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># TYPE python_gc_objects_uncollectable_total counter</span>
+</span></span><span style="display:flex;"><span>python_gc_objects_uncollectable_total<span style="color:#f92672">{</span>generation<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;0&#34;</span><span style="color:#f92672">}</span> 0.0
+</span></span><span style="display:flex;"><span>python_gc_objects_uncollectable_total<span style="color:#f92672">{</span>generation<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;1&#34;</span><span style="color:#f92672">}</span> 0.0
+</span></span><span style="display:flex;"><span>python_gc_objects_uncollectable_total<span style="color:#f92672">{</span>generation<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;2&#34;</span><span style="color:#f92672">}</span> 0.0
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># HELP python_gc_collections_total Number of times this generation was collected</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># TYPE python_gc_collections_total counter</span>
+</span></span><span style="display:flex;"><span>python_gc_collections_total<span style="color:#f92672">{</span>generation<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;0&#34;</span><span style="color:#f92672">}</span> 41.0
+</span></span><span style="display:flex;"><span>python_gc_collections_total<span style="color:#f92672">{</span>generation<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;1&#34;</span><span style="color:#f92672">}</span> 3.0
+</span></span><span style="display:flex;"><span>python_gc_collections_total<span style="color:#f92672">{</span>generation<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;2&#34;</span><span style="color:#f92672">}</span> 0.0
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># HELP python_info Python platform information</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># TYPE python_info gauge</span>
+</span></span><span style="display:flex;"><span>python_info<span style="color:#f92672">{</span>implementation<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;CPython&#34;</span>,major<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;3&#34;</span>,minor<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;9&#34;</span>,patchlevel<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;0&#34;</span>,version<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;3.9.0&#34;</span><span style="color:#f92672">}</span> 1.0
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># HELP SymbolPrice Symbol high and low price</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># TYPE SymbolPrice gauge</span>
+</span></span><span style="display:flex;"><span>SymbolPrice<span style="color:#f92672">{</span>symbols<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;BNBUSDT-high&#34;</span><span style="color:#f92672">}</span> 363.2
+</span></span><span style="display:flex;"><span>SymbolPrice<span style="color:#f92672">{</span>symbols<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;BNBUSDT-low&#34;</span><span style="color:#f92672">}</span> 363.0
+</span></span><span style="display:flex;"><span>SymbolPrice<span style="color:#f92672">{</span>symbols<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;XRPUSDT-high&#34;</span><span style="color:#f92672">}</span> 0.7599
+</span></span><span style="display:flex;"><span>SymbolPrice<span style="color:#f92672">{</span>symbols<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;XRPUSDT-low&#34;</span><span style="color:#f92672">}</span> 0.7591
+</span></span><span style="display:flex;"><span>SymbolPrice<span style="color:#f92672">{</span>symbols<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;ETHUSDT-high&#34;</span><span style="color:#f92672">}</span> 2525.16
+</span></span><span style="display:flex;"><span>SymbolPrice<span style="color:#f92672">{</span>symbols<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;ETHUSDT-low&#34;</span><span style="color:#f92672">}</span> 2523.81
+</span></span><span style="display:flex;"><span>SymbolPrice<span style="color:#f92672">{</span>symbols<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;BTCUSDT-high&#34;</span><span style="color:#f92672">}</span> 37984.81
+</span></span><span style="display:flex;"><span>SymbolPrice<span style="color:#f92672">{</span>symbols<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;BTCUSDT-low&#34;</span><span style="color:#f92672">}</span> 37971.19
+</span></span><span style="display:flex;"><span>SymbolPrice<span style="color:#f92672">{</span>symbols<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;DOGEUSDT-high&#34;</span><span style="color:#f92672">}</span> 0.1113
+</span></span><span style="display:flex;"><span>SymbolPrice<span style="color:#f92672">{</span>symbols<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;DOGEUSDT-low&#34;</span><span style="color:#f92672">}</span> 0.1112
+</span></span></code></pre></div><!-- raw HTML omitted -->
+<p>Obvioiusly you could run docker cmd for this, I have also got a docker-compose.yml here as well.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yml" data-lang="yml"><span style="display:flex;"><span><span style="color:#f92672">version</span>: <span style="color:#e6db74">&#34;3.9&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">services</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">prometheus</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">image</span>: <span style="color:#ae81ff">prom/prometheus</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">ports</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#e6db74">&#34;9090:9090&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">volumes</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">/pathofown/prometheus.yml:/etc/prometheus/prometheus.yml</span>
+</span></span></code></pre></div><p>Before running this you will also need a prometheus configuration file with the name of &ldquo;prometheus.yml&rdquo;, in a nutshell in this file you will specify the metrics endpoint from where the server is going to collect data from. When running the Prometheus container, you need to mount the <a href="https://docs.docker.com/storage/volumes/">volume</a> for you Prometheus container so that this config file is place in &ldquo;/etc/prometheus/prometheus.yml&rdquo; at container runtime.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yml" data-lang="yml"><span style="display:flex;"><span><span style="color:#f92672">global</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">scrape_interval</span>:     <span style="color:#ae81ff">5s</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">evaluation_interval</span>: <span style="color:#ae81ff">5s</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">scrape_configs</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">job_name</span>: <span style="color:#e6db74">&#34;prome-local&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">static_configs</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#f92672">targets</span>: [<span style="color:#e6db74">&#34;localhost:9090&#34;</span>]
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">job_name</span>: <span style="color:#e6db74">&#34;TestJob&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">static_configs</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#f92672">targets</span>: [<span style="color:#e6db74">&#34;host.docker.internal:8000&#34;</span>]
+</span></span></code></pre></div><h3 id="quick-explanation-3">Quick explanation</h3>
+<p>Line 8 specifies the port of Prometheus server running locally
+Line 11 specifies the port and DNS name of the metric endpoint created in Part 3. Note the dns is &ldquo;hosrt.docker.internal&rdquo;, this worked for me when running containers with <a href="https://www.docker.com/products/docker-desktop">Docker Destop</a>.</p>
+<!-- raw HTML omitted -->
+<p>Lets start Docker Desktop and run Prometheus server locally either using docker cmd or docker-compose at choice of yours. 
+When navigating to http://localhost:9090/targets，voilà ！Both the Prometheus server and the Metric endpoints for the websocekt are up and running !</p>
+<p><img src="/assets/blog_images/websocket-prometheus/prometheus1.png" alt="prometheus1"></p>
+<p>As you can see both of the jobs that you specified in the prometheus.yml file are running !</p>
+<p>When navigate back to the graph page, you can easily enter &ldquo;symbolPrice&rdquo; in the search box and hit execute. You then should be able to see a graph like the following and you can highligh different lables to see the price change for each of the symbols. In may case I selected &ldquo;BNBUSDT-high&rdquo;</p>
+<p><img src="/assets/blog_images/websocket-prometheus/prometheus2.png" alt="prometheus2"></p>
+<p>Congratulations! You&quot;v just reach the end of this blog, I know right ? It is a rather long blog to read, but at least I found the excercis pretty interesting and when you see the graph in Prometheus, it somewhat feeling really comforting !</p>
+<p>Thanks for you patience, see you at my next blog !!</p>
+    </div>
+    
+      
+        <div class="pagination">
+          <div class="pagination__title">
+            <span class="pagination__title-h"
+              >Read other posts</span
+            >
+            <hr />
+          </div>
+          <div class="pagination__buttons">
+            
+              <span class="button previous">
+                <a href="http://example.org/posts/my-first-post/">
+                  <span class="button__icon">←</span>
+                  <span class="button__text">My First Post</span>
+                </a>
+              </span>
+            
+            
+          </div>
+        </div>
+      
+    
+
+    
+      
+        
+
+      
+    
+  </div>
+
+      </div>
+
+      
+        <footer class="footer">
+  <div class="footer__inner">
+    
+    <a
+  href="/"
+  class="logo"
+  style="text-decoration: none;"
+>
+  
+    <span class="logo__mark"><i class="fas fa-terminal"></i></span>
+    <span class="logo__text">
+      blacklabnz
+    </span>
+    <span class="logo__cursor"></span>
+  
+</a>
+
+    <div class="copyright">
+      <span>
+        © 2022 blacklabnz
+      </span>
+    </div>
+    
+  </div>
+</footer>
+
+<script src="http://example.org/assets/main.js"></script>
+<script src="http://example.org/assets/prism.js"></script>
+
+      
+    </div>
+
+    
+  </body>
+</html>
