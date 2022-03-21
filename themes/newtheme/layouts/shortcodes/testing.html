@@ -1,0 +1,4 @@
+{{ range $.Site.Params.Menus.main }}
+{{ .name }}
+<li><a href="{{ .URL }}">{{ .Name }}</a></li>
+{{ end }}
