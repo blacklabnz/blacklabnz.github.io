@@ -23,7 +23,10 @@
             t.stopPropagation(), i && i.classList.toggle("hidden"),
                 i && i.getBoundingClientRect().right > e.getBoundingClientRect().right && (i.style.left = "auto", i.style.right = 0)
         })),
-        r = window.localStorage && window.localStorage.getItem("theme"), a = document.querySelector(".theme-toggle"), l = "dark" === r, null !== r && document.body.classList.toggle("dark-theme", l),
+        r = window.localStorage && window.localStorage.getItem("theme"), 
+        a = document.querySelector(".theme-toggle"), 
+        l = "dark" === r, 
+        null !== r && document.body.classList.toggle("dark-theme", l),
         a.addEventListener(
             "click", (
             function () {
