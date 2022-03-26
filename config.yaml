@@ -20,7 +20,7 @@ params:
     title: blacklabnz
     description: "ExampleSite description"
     keywords: [Blog, Portfolio, PaperMod]
-    author: blacklab
+    author: blacklabnz
     # author: ["Me", "You"] # multiple authors
     images: ["<link or path of image for opengraph, twitter-cards>"]
     DateFormat: "January 2, 2006"
@@ -50,7 +50,7 @@ params:
         safari_pinned_tab: "<link / abs url>"
 
     label:
-        text: "blacklab"
+        text: "blacklabnz"
         icon: /apple-touch-icon.png
         iconHeight: 35
 
@@ -72,7 +72,7 @@ params:
     # home-info mode
     homeInfoParams:
         Title: "Hi there \U0001F44B"
-        Content: Welcome to my blog
+        Content:
 
     socialIcons:
         - name: twitter
@@ -116,14 +116,18 @@ menu:
           name: posts
           url: /posts
           weight: 10
-        - identifier: categories
-          name: categories
-          url: /categories/
-          weight: 20
+        # - identifier: categories
+        #   name: categories
+        #   url: /categories/
+        #   weight: 20
         - identifier: tags
           name: tags
           url: /tags/
           weight: 30
+        - identifier: about
+          name: about
+          url: /about/
+          weight: 40
 # Read: https://github.com/adityatelange/hugo-PaperMod/wiki/FAQs#using-hugos-syntax-highlighter-chroma
 pygmentsUseClasses: true
 markup:
@@ -133,3 +137,9 @@ markup:
         guessSyntax: true
         lineNos: true
         style: dracula
+
+# Used for displaying categories and tag page result
+taxonomies:
+    category: categories
+    tag: tags
+    series: series
