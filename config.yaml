@@ -71,14 +71,14 @@ params:
 
     # home-info mode
     homeInfoParams:
-        Title: "Hi there \U0001F44B"
-        Content:
+        Title: "Welcome to my tech blog! \U0001F44B"
+        Content: "A place I share learnings through my tech journey."
 
     socialIcons:
-        - name: twitter
-          url: "https://twitter.com/"
-        - name: stackoverflow
-          url: "https://stackoverflow.com"
+        - name: linkedin
+          url: "https://linkedin.com/"
+        # - name: stackoverflow
+        #   url: "https://stackoverflow.com"
         - name: github
           url: "https://github.com/"
 
@@ -113,7 +113,7 @@ params:
 menu:
     main:
         - identifier: posts
-          name: posts
+          name: blogs
           url: /posts
           weight: 10
         # - identifier: categories

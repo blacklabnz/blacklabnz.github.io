@@ -14,7 +14,7 @@
 {{- with $ShareButtons }}{{ $custom = true }}{{ end }}
 
 <div class="share-buttons">
-    <a><i class="fas fa-share-alt"></i></a>
+    <a>Share via:</a>
     
     {{- if (cond ($custom) (in $ShareButtons "twitter") (true)) }}
     <a target="_blank" rel="noopener noreferrer" aria-label="share {{ $title | plainify }} on twitter"

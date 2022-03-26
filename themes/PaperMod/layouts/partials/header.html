@@ -60,7 +60,7 @@
             </ul>
             <ul>
                 <span id="cursor"></span>
-            </ul>            
+            </ul>
         </div>
         {{- $currentPage := . }}
         <ul id="menu">
@@ -79,6 +79,16 @@
                 </a>
             </li>
             {{- end }}
+            <li>
+                <a href="http://linkedin.com" target="_blank">
+                    <i class="fab fa-linkedin-in fa-lg"></i>
+                </a>
+            </li>
+            <li>
+                <a href="https://github.com" target="_blank">
+                    <i class="fab fa-github fa-lg"></i>
+                </a>
+            </li>
             <span class="logo-switches">
                 {{- if (not .Site.Params.disableThemeToggle) }}
                 <button id="theme-toggle" accesskey="t" title="(Alt + T)">
@@ -100,7 +110,7 @@
                         <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
                         <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
                     </svg> -->
-                    <i class="fas fa-adjust fa-xs"></i>
+                    <i class="fas fa-lightbulb"></i>
                 </button>
                 {{- end }}
 
