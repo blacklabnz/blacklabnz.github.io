@@ -1,7 +1,7 @@
 ---
 title:  "Consume Websocket stream and send to Prometheus in Python"
 category: Technology
-tag: ["websocket", "Prometheus", "python" ]
+tags: ["websocket", "Prometheus", "python" ]
 excerpt_separator: <!--more-->
 ---
 
