@@ -1,18 +1,17 @@
 ---
 title:  "Consume Websocket stream and send to Prometheus in Python"
 category: Technology
-tag: ["websocket", "Prometheus", "python" ]
-excerpt_separator: <!--more-->
+tags: ["websocket", "prometheus", "python" ]
+categories: ["DevOps", "monitoring"]
+ShowToc: true
+TocOpen: false
+weight: 1
 ---
 
 Recently I was tasked with consuming data from websocket, analyse it and then send data to Prometheus.
 The theory is pretty straight forward: getting data from websocket API in a stream and analyse and take the data points and send it to prometheus for visulization.
 In this blog you will have all the steps and code needed to reporduce this flow.
-<!--more-->
 With this in mind, I decided using python to achieve all these.
-
-* TOC
-{:toc}
 
 ## Part 1. Websocket VS Rest reminder
 

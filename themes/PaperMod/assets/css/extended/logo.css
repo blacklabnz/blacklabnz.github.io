@@ -1,0 +1,43 @@
+.logo
+#cursor {
+    -webkit-animation: cursor 0.8s infinite;
+    animation: cursor 0.8s infinite;
+    background: #57fe51;
+    border-radius: 1px;
+    display: inline-block;
+    height: 1.5rem;
+    width: 10px;
+    vertical-align: sub;
+}
+
+.logo ul {
+    margin-left: 10px;
+}
+
+@-webkit-keyframes cursor {
+    0% {
+        opacity: 0
+    }
+
+    50% {
+        opacity: 1
+    }
+
+    to {
+        opacity: 0
+    }
+}
+
+@keyframes cursor {
+    0% {
+        opacity: 0
+    }
+
+    50% {
+        opacity: 1
+    }
+
+    to {
+        opacity: 0
+    }
+}
