@@ -4,8 +4,6 @@ date: "2022-03-20"
 author: "Neil Xu"
 ---
 
-A place I share learnings through my journey.
-
 Hi there, great to meet you here. My name is Neil，currently working as a Data Engineer operating in the cloud. 
 
 Previously I was working in DevOps capacity, focusing on building useful CICD pipelines, automations, APIs and else. 
