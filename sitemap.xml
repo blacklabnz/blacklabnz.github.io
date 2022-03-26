@@ -2,25 +2,37 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://blacklabnz.github.io/about/</loc>
+    <loc>https://blacklabnz.github.com/posts/websocket-prometheus/</loc>
+  </url><url>
+    <loc>https://blacklabnz.github.com/about/</loc>
     <lastmod>2022-03-20T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://blacklabnz.github.io/</loc>
+    <loc>https://blacklabnz.github.com/</loc>
     <lastmod>2022-03-20T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://blacklabnz.github.io/posts/my-first-post/</loc>
+    <loc>https://blacklabnz.github.com/posts/my-first-post/</loc>
     <lastmod>2022-03-18T23:39:13+13:00</lastmod>
   </url><url>
-    <loc>https://blacklabnz.github.io/posts/</loc>
+    <loc>https://blacklabnz.github.com/posts/</loc>
     <lastmod>2022-03-18T23:39:13+13:00</lastmod>
   </url><url>
-    <loc>https://blacklabnz.github.io/showcase/</loc>
+    <loc>https://blacklabnz.github.com/showcase/</loc>
     <lastmod>2019-01-18T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://blacklabnz.github.io/categories/</loc>
+    <loc>https://blacklabnz.github.com/categories/</loc>
   </url><url>
-    <loc>https://blacklabnz.github.io/posts/websocket-prometheus/</loc>
+    <loc>https://blacklabnz.github.com/categories/devops/</loc>
   </url><url>
-    <loc>https://blacklabnz.github.io/tags/</loc>
+    <loc>https://blacklabnz.github.com/categories/monitoring/</loc>
+  </url><url>
+    <loc>https://blacklabnz.github.com/tags/prometheus/</loc>
+  </url><url>
+    <loc>https://blacklabnz.github.com/tags/python/</loc>
+  </url><url>
+    <loc>https://blacklabnz.github.com/series/</loc>
+  </url><url>
+    <loc>https://blacklabnz.github.com/tags/</loc>
+  </url><url>
+    <loc>https://blacklabnz.github.com/tags/websocket/</loc>
   </url>
 </urlset>

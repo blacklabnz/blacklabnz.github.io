@@ -8,7 +8,7 @@
     --color-secondary: #999;
     --border-color: #dcdcdc;
     --phoneWidth: (max-width:684px);
-    --tabletWidth: (max-width:900px);
+    --tabletWidth: (max-width:900px)
 }
 
 body.dark-theme {
@@ -152,14 +152,20 @@ a.read-more, a.read-more:active, a.read-more:hover {
 }
 
 
-.theme-toggle {
+/* .header__inner, .theme-toggle {
     align-items: center;
-    display: flex;
+    display: flex
+} */
+
+/* .theme-toggle {
     cursor: pointer;
     justify-content: center;
-    line-height: 1;
-    fill: currentColor
+    line-height: 1
 }
+
+.theme-toggler {
+    fill: currentColor
+} */
 
 .logo {
     align-items: center;
@@ -194,8 +200,8 @@ a.read-more, a.read-more:active, a.read-more:hover {
 }
 
 .logo__cursor {
-    -webkit-animation: cursor 0.8s infinite;
-    animation: cursor 0.8s infinite;
+    -webkit-animation: cursor 1s infinite;
+    animation: cursor 1s infinite;
     background: #57fe51;
     border-radius: 1px;
     display: inline-block;
@@ -600,7 +606,7 @@ th {
 
 ol, ul {
     margin-left: 40px;
-    padding: 0;
+    padding: 0
 }
 
 @media (max-width:683px) {
@@ -1323,13 +1329,16 @@ div.code-toolbar>.toolbar a:focus, div.code-toolbar>.toolbar a:hover, div.code-t
     .contact {
         margin: 0 0 0 10px;
     }
+}
+
+@media (max-width:683px) {
     .theme-toggle {
         margin: 0 0 0 10px;
     }
 }
 
-@media (min-width: 683px) {
-    #menu-show {
+@media (max-width: 683px) {
+    #menu-select {
         display: none;
     }
 }
