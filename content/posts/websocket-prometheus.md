@@ -308,10 +308,9 @@ scrape_configs:
 Line 8 specifies the port of Prometheus server running locally
 Line 11 specifies the port and DNS name of the metric endpoint created in Part 3. Note the dns is "hosrt.docker.internal", this worked for me when running containers with [Docker Destop](https://www.docker.com/products/docker-desktop).
 
-<div class="Note" style="background-color:#495057; font-size:15px; margin:10px; padding:10px; border-radius: 10px">
-<i class="fas fa-exclamation-circle"></i>
+{{< note >}}
 Note the Prometheus server configuration could be way more complicated than what we are doing here.Again the purpose of this blog is not to setup prometheus for production, we only what to tip our teo on the surface and have a feel on it!
-</div>
+{{< /note >}}
 
 Lets start Docker Desktop and run Prometheus server locally either using docker cmd or docker-compose at choice of yours. 
 When navigating to http://localhost:9090/targets，voilà ！Both the Prometheus server and the Metric endpoints for the websocekt are up and running !
