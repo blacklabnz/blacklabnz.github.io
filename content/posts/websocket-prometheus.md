@@ -34,8 +34,6 @@ The following code snippet can be used to connect to websocket API:
 import json
 import websocket
 
-socket = "wss://stream.binance.com:9443/ws/bnbusdt@kline_1m"
-
 def on_message(ws, message):
     data = json.loads(message)
     print(data)
