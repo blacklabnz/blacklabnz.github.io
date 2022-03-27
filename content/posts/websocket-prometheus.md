@@ -34,7 +34,7 @@ The following code snippet can be used to connect to websocket API:
 import json
 import websocket
 
-socket = 'wss://stream.binance.com:9443/ws/bnbusdt@kline_1m'
+socket = "wss://stream.binance.com:9443/ws/bnbusdt@kline_1m"
 
 def on_open(ws):
     print("Opened connection")
@@ -54,7 +54,8 @@ ws = websocket.WebSocketApp(
     on_open=on_open, 
     on_message=on_message, 
     on_error=on_error, 
-    on_close=on_close )
+    on_close=on_close)
+    
 ws.run_forever()
 ```
 
@@ -91,15 +92,15 @@ socket = "wss://stream.binance.com:9443/ws"
 
 ws = websocket.create_connection(socket)
 ws.send(json.dumps({
-  "method": "SUBSCRIBE",
-  "params": [
-    "btcusdt@kline_1m",
-    "bnbusdt@kline_1m",
-    "ethusdt@kline_1m",
-    "dogeusdt@kline_1m",
-    "xrpusdt@kline_1m"
-  ],
-  "id": 1
+    "method": "SUBSCRIBE",
+    "params": [
+        "btcusdt@kline_1m",
+        "bnbusdt@kline_1m",
+        "ethusdt@kline_1m",
+        "dogeusdt@kline_1m",
+        "xrpusdt@kline_1m"
+    ],
+    "id": 1
 }))
 
 def on_message(message):
@@ -120,15 +121,15 @@ The playload of the subscription is like this:
 
 ```json
 {
-  "method": "SUBSCRIBE",
-  "params": [
-    "btcusdt@kline_1m",
-    "bnbusdt@kline_1m",
-    "ethusdt@kline_1m",
-    "dogeusdt@kline_1m",
-    "xrpusdt@kline_1m"
-  ],
-  "id": 1
+    "method": "SUBSCRIBE",
+    "params": [
+        "btcusdt@kline_1m",
+        "bnbusdt@kline_1m",
+        "ethusdt@kline_1m",
+        "dogeusdt@kline_1m",
+        "xrpusdt@kline_1m"
+    ],
+    "id": 1
 }
 ```
 
@@ -136,8 +137,8 @@ According to the [API doc](https://github.com/binance/binance-spot-api-docs/blob
 
 ```json 
 {
-  "result": null,
-  "id": 1
+    "result": null,
+    "id": 1
 }
 ```
 
@@ -161,28 +162,28 @@ Recall the follow symbol data output from our previous step:
 
 ```json
 {
-  "e": "kline",     // Event type
-  "E": 123456789,   // Event time
-  "s": "BNBBTC",    // Symbol
-  "k": {
-    "t": 123400000, // Kline start time
-    "T": 123460000, // Kline close time
-    "s": "BNBBTC",  // Symbol
-    "i": "1m",      // Interval
-    "f": 100,       // First trade ID
-    "L": 200,       // Last trade ID
-    "o": "0.0010",  // Open price
-    "c": "0.0020",  // Close price
-    "h": "0.0025",  // High price
-    "l": "0.0015",  // Low price
-    "v": "1000",    // Base asset volume
-    "n": 100,       // Number of trades
-    "x": false,     // Is this kline closed?
-    "q": "1.0000",  // Quote asset volume
-    "V": "500",     // Taker buy base asset volume
-    "Q": "0.500",   // Taker buy quote asset volume
-    "B": "123456"   // Ignore
-  }
+    "e": "kline",     // Event type
+    "E": 123456789,   // Event time
+    "s": "BNBBTC",    // Symbol
+    "k": {
+        "t": 123400000, // Kline start time
+        "T": 123460000, // Kline close time
+        "s": "BNBBTC",  // Symbol
+        "i": "1m",      // Interval
+        "f": 100,       // First trade ID
+        "L": 200,       // Last trade ID
+        "o": "0.0010",  // Open price
+        "c": "0.0020",  // Close price
+        "h": "0.0025",  // High price
+        "l": "0.0015",  // Low price
+        "v": "1000",    // Base asset volume
+        "n": 100,       // Number of trades
+        "x": false,     // Is this kline closed?
+        "q": "1.0000",  // Quote asset volume
+        "V": "500",     // Taker buy base asset volume
+        "Q": "0.500",   // Taker buy quote asset volume
+        "B": "123456"   // Ignore
+    }
 }
 ```
 
@@ -194,9 +195,9 @@ Our analysis here is as simple as just reading some properties and this is not v
 def on_message(message):
     data = json.loads(message)
     if "k" not in data:
-      pass
+        pass
     else:
-      print(data["s"], data["k"]["l"], data["k"]["h"])
+        print(data["s"], data["k"]["l"], data["k"]["h"])
 ```
 
 Once call back function is updated we should see the following output that captures properties we are interested
@@ -218,17 +219,18 @@ import json
 import websocket
 from prometheus_client import Gauge, start_http_server
 
-g= Gauge("SymbolPrice", "Symbol high and low price", ["symbols"])
+g = Gauge("SymbolPrice", "Symbol high and low price", ["symbols"])
+
 start_http_server(8000)
 
 def on_message(message):
     data = json.loads(message)
     if "k" not in data:
-      pass
+        pass
     else:
-      print(data["s"], data["k"]["l"], data["k"]["h"])
-      g.labels(f"{data["s"]}-high").set(data["k"]["h"])
-      g.labels(f"{data["s"]}-low").set(data["k"]["l"])
+        print(data["s"], data["k"]["l"], data["k"]["h"])
+        g.labels(f"{data["s"]}-high").set(data["k"]["h"])
+        g.labels(f"{data["s"]}-low").set(data["k"]["l"])
 ```
 
 ### Quick explanation
