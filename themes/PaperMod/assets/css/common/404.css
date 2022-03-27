@@ -1,11 +1,21 @@
-.not-found {
-    position: absolute;
-    left: 0;
-    right: 0;
+.not-found h1 {
     display: flex;
     align-items: center;
     justify-content: center;
+    vertical-align: middle;
     height: 80%;
     font-size: 160px;
     font-weight: 700;
 }
+
+.not-found p {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    font-size: 20px;
+}
+
+
+
+
