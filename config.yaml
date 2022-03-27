@@ -49,9 +49,8 @@ params:
         apple_touch_icon: "<link / abs url>"
         safari_pinned_tab: "<link / abs url>"
 
-    # For site logo, currently not used
-    # label:
-    #     text: "blacklabnz"
+    label:
+        text: "blacklabnz"
     #     icon: /avatar.png
     #     iconHeight: 35
 
