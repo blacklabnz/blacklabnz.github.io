@@ -3,6 +3,7 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://blacklabnz.github.io/posts/websocket-prometheus/</loc>
+    <lastmod>2022-03-18T23:39:13+13:00</lastmod>
   </url><url>
     <loc>https://blacklabnz.github.io/about/</loc>
     <lastmod>2022-03-20T00:00:00+00:00</lastmod>
@@ -10,29 +11,33 @@
     <loc>https://blacklabnz.github.io/</loc>
     <lastmod>2022-03-20T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://blacklabnz.github.io/posts/my-first-post/</loc>
+    <loc>https://blacklabnz.github.io/categories/</loc>
+    <lastmod>2022-03-18T23:39:13+13:00</lastmod>
+  </url><url>
+    <loc>https://blacklabnz.github.io/categories/devops/</loc>
+    <lastmod>2022-03-18T23:39:13+13:00</lastmod>
+  </url><url>
+    <loc>https://blacklabnz.github.io/categories/monitoring/</loc>
     <lastmod>2022-03-18T23:39:13+13:00</lastmod>
   </url><url>
     <loc>https://blacklabnz.github.io/posts/</loc>
     <lastmod>2022-03-18T23:39:13+13:00</lastmod>
   </url><url>
+    <loc>https://blacklabnz.github.io/tags/prometheus/</loc>
+    <lastmod>2022-03-18T23:39:13+13:00</lastmod>
+  </url><url>
+    <loc>https://blacklabnz.github.io/tags/python/</loc>
+    <lastmod>2022-03-18T23:39:13+13:00</lastmod>
+  </url><url>
+    <loc>https://blacklabnz.github.io/tags/</loc>
+    <lastmod>2022-03-18T23:39:13+13:00</lastmod>
+  </url><url>
+    <loc>https://blacklabnz.github.io/tags/websocket/</loc>
+    <lastmod>2022-03-18T23:39:13+13:00</lastmod>
+  </url><url>
     <loc>https://blacklabnz.github.io/showcase/</loc>
     <lastmod>2019-01-18T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://blacklabnz.github.io/categories/</loc>
-  </url><url>
-    <loc>https://blacklabnz.github.io/categories/devops/</loc>
-  </url><url>
-    <loc>https://blacklabnz.github.io/categories/monitoring/</loc>
-  </url><url>
-    <loc>https://blacklabnz.github.io/tags/prometheus/</loc>
-  </url><url>
-    <loc>https://blacklabnz.github.io/tags/python/</loc>
-  </url><url>
     <loc>https://blacklabnz.github.io/series/</loc>
-  </url><url>
-    <loc>https://blacklabnz.github.io/tags/</loc>
-  </url><url>
-    <loc>https://blacklabnz.github.io/tags/websocket/</loc>
   </url>
 </urlset>

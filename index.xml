@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
-    <title>Index on blacklabnz</title>
+    <title>Index on blacklabnz | Data | DevOps</title>
     <link>https://blacklabnz.github.io/</link>
-    <description>Recent content in Index on blacklabnz</description>
+    <description>Recent content in Index on blacklabnz | Data | DevOps</description>
     <image>
       <url>https://blacklabnz.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
       <link>https://blacklabnz.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
@@ -13,7 +13,7 @@
     <item>
       <title>Consume Websocket stream and send to Prometheus in Python</title>
       <link>https://blacklabnz.github.io/posts/websocket-prometheus/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <pubDate>Fri, 18 Mar 2022 23:39:13 +1300</pubDate>
       
       <guid>https://blacklabnz.github.io/posts/websocket-prometheus/</guid>
       <description>Recently I was tasked with consuming data from websocket, analyse it and then send data to Prometheus. The theory is pretty straight forward: getting data from websocket API in a stream and analyse and take the data points and send it to prometheus for visulization. In this blog you will have all the steps and code needed to reporduce this flow. With this in mind, I decided using python to achieve all these.</description>
@@ -29,15 +29,6 @@
 Previously I was working in DevOps capacity, focusing on building useful CICD pipelines, automations, APIs and else.
 With switching my career into IT at mid point, you see how determined I am to devote into IT and of cource how much I love it ! 😀
 Thourhg out my career, I might share some tips and trick which I hope you find helpful !</description>
-    </item>
-    
-    <item>
-      <title>My First Post</title>
-      <link>https://blacklabnz.github.io/posts/my-first-post/</link>
-      <pubDate>Fri, 18 Mar 2022 23:39:13 +1300</pubDate>
-      
-      <guid>https://blacklabnz.github.io/posts/my-first-post/</guid>
-      <description> Go to your site&amp;rsquo;s url  </description>
     </item>
     
     <item>

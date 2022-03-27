@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
-    <title>Tags on blacklabnz</title>
+    <title>Tags on blacklabnz | Data | DevOps</title>
     <link>https://blacklabnz.github.io/tags/</link>
-    <description>Recent content in Tags on blacklabnz</description>
+    <description>Recent content in Tags on blacklabnz | Data | DevOps</description>
     <image>
       <url>https://blacklabnz.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
       <link>https://blacklabnz.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
     </image>
-    <generator>Hugo -- gohugo.io</generator><atom:link href="https://blacklabnz.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
+    <generator>Hugo -- gohugo.io</generator>
+    <lastBuildDate>Fri, 18 Mar 2022 23:39:13 +1300</lastBuildDate><atom:link href="https://blacklabnz.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>prometheus</title>
       <link>https://blacklabnz.github.io/tags/prometheus/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <pubDate>Fri, 18 Mar 2022 23:39:13 +1300</pubDate>
       
       <guid>https://blacklabnz.github.io/tags/prometheus/</guid>
       <description></description>
@@ -21,7 +22,7 @@
     <item>
       <title>python</title>
       <link>https://blacklabnz.github.io/tags/python/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <pubDate>Fri, 18 Mar 2022 23:39:13 +1300</pubDate>
       
       <guid>https://blacklabnz.github.io/tags/python/</guid>
       <description></description>
@@ -30,7 +31,7 @@
     <item>
       <title>websocket</title>
       <link>https://blacklabnz.github.io/tags/websocket/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <pubDate>Fri, 18 Mar 2022 23:39:13 +1300</pubDate>
       
       <guid>https://blacklabnz.github.io/tags/websocket/</guid>
       <description></description>
