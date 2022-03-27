@@ -1,5 +1,5 @@
 baseURL: "https://blacklabnz.github.io/"
-title: blacklabnz
+title: blacklabnz | Data | DevOps
 paginate: 5
 theme: PaperMod
 
@@ -7,7 +7,7 @@ enableRobotsTXT: true
 buildDrafts: false
 buildFuture: false
 buildExpired: false
-pygmentsUseClasses: true
+# enableInlineShortcodes: true
 
 googleAnalytics: G-FDV12HCDKK
 
@@ -44,15 +44,16 @@ params:
         disableHLJS: true # to disable highlight.js
         # disableFingerprinting: true
         favicon: "<link / abs url>"
-        favicon16x16: "<link / abs url>"
-        favicon32x32: "<link / abs url>"
+        favicon16x16: /favicon16x16.png
+        favicon32x32: /favicon32x32.png
         apple_touch_icon: "<link / abs url>"
         safari_pinned_tab: "<link / abs url>"
 
-    label:
-        text: "blacklabnz"
-        icon: /apple-touch-icon.png
-        iconHeight: 35
+    # For site logo, currently not used
+    # label:
+    #     text: "blacklabnz"
+    #     icon: /avatar.png
+    #     iconHeight: 35
 
     # profile-mode
     profileMode:
@@ -76,11 +77,11 @@ params:
 
     socialIcons:
         - name: linkedin
-          url: "https://linkedin.com/"
+          url: "https://www.linkedin.com/in/neilxu/"
         # - name: stackoverflow
         #   url: "https://stackoverflow.com"
         - name: github
-          url: "https://github.com/"
+          url: "https://github.com/blacklabnz"
 
     analytics:
         google:

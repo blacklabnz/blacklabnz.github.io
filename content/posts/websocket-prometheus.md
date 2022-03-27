@@ -1,5 +1,6 @@
 ---
 title:  "Consume Websocket stream and send to Prometheus in Python"
+date: 2022-03-18T23:39:13+13:00
 category: Technology
 tags: ["websocket", "prometheus", "python" ]
 categories: ["DevOps", "monitoring"]
@@ -17,7 +18,8 @@ With this in mind, I decided using python to achieve all these.
 
 Before we start, I would like to have a bit of revision on Websocket API and how it is different from REST API
 
-![websocketvsrest](/assets/blog_images/{{ page.slug }}/websocketvsrest.png)
+![websocketvsrest]({{< get_image_link image_name="websocketvsrest.png" >}})
+
 
 The diagram I took from internet explains it quite well. In simple term, you interact with REST API with a request and response fashion wheraes in websocket there is a two way connection established during interaction lifecycle therefore you dont need to constantly send request to server for retrieving data. At the end of the interaction, the two way connection is close.
 
@@ -69,7 +71,6 @@ Line 19 and 10 creates a websocket instance and start connection and run forever
 Run the above python code will give you this console output:
 
 ```python
-(venv) λ python run.py
 Opened connection
 {"e": "kline", "E": 1647220248756, "s": "BNBUSDT", "k": {"t": 1647220200000, "T": 1647220259999, "s": "BNBUSDT", "i": "1m", "f": 527449288, "L": 527449503, "o": "364.60000000", "c": "364.30000000", "h": "364.60000000", "l": "364.20000000", "v": "458.54400000", "n": 216, "x": False, "q": "167076.68030000", "V": "183.99400000", "Q": "67043.53500000", "B": "0"}}
 {"e": "kline", "E": 1647220251279, "s": "BNBUSDT", "k": {"t": 1647220200000, "T": 1647220259999, "s": "BNBUSDT", "i": "1m", "f": 527449288, "L": 527449507, "o": "364.60000000", "c": "364.30000000", "h": "364.60000000", "l": "364.20000000", "v": "460.67000000", "n": 220, "x": False, "q": "167851.03680000", "V": "184.66700000", "Q": "67288.70890000", "B": "0"}}
@@ -144,9 +145,9 @@ When we inspect the console output when running the above python code we also ge
 
 ```json
 {"result": "None", "id": 1}
-{"e": "kline", "E": 1647220380568, "s": "XRPUSDT", "k": {"t": 1647220320000, "T": 1647220379999, "s": "XRPUSDT", "i": "1m", "f": 429501724, "L": 429501859, "o": "0.75860000", "c": "0.75920000", "h": "0.75920000", "l": "0.75860000", "v": "81089.00000000", "n": 136, "x": True, "q": "61541.60570000", "V": "63081.00000000", "Q": "47874.45210000", "B": "0"}}
-{"e": "kline", "E": 1647220382238, "s": "BTCUSDT", "k": {"t": 1647220380000, "T": 1647220439999, "s": "BTCUSDT", "i": "1m", "f": 1291349545, "L": 1291349561, "o": "38183.79000000", "c": "38183.79000000", "h": "38183.80000000", "l": "38183.79000000", "v": "0.25519000", "n": 17, "x": False, "q": "9744.12173000", "V": "0.03599000", "Q": "1374.23496200", "B": "0"}}
-{"e": "kline", "E": 1647220382372, "s": "BNBUSDT", "k": {"t": 1647220380000, "T": 1647220439999, "s": "BNBUSDT", "i": "1m", "f": 527450005, "L": 527450009, "o": "363.80000000", "c": "363.70000000", "h": "363.80000000", "l": "363.70000000", "v": "2.58200000", "n": 5, "x": False, "q": "939.30620000", "V": "2.32800000", "Q": "846.92640000", "B": "0"}}
+{"e": "kline", "E": 1647220380568, "s": "XRPUSDT", "k": {"t": 1647220320000, "T": 1647220379999, "s": "XRPUSDT", "i": "1m", "f": 429501724, "L": 429501859, "o": "0.75860000", "c": "0.75920000", "h": "0.75920000", "l": "0.75860000", "v": "81089.00000000", "n": 136, "x": true, "q": "61541.60570000", "V": "63081.00000000", "Q": "47874.45210000", "B": "0"}}
+{"e": "kline", "E": 1647220382238, "s": "BTCUSDT", "k": {"t": 1647220380000, "T": 1647220439999, "s": "BTCUSDT", "i": "1m", "f": 1291349545, "L": 1291349561, "o": "38183.79000000", "c": "38183.79000000", "h": "38183.80000000", "l": "38183.79000000", "v": "0.25519000", "n": 17, "x": false, "q": "9744.12173000", "V": "0.03599000", "Q": "1374.23496200", "B": "0"}}
+{"e": "kline", "E": 1647220382372, "s": "BNBUSDT", "k": {"t": 1647220380000, "T": 1647220439999, "s": "BNBUSDT", "i": "1m", "f": 527450005, "L": 527450009, "o": "363.80000000", "c": "363.70000000", "h": "363.80000000", "l": "363.70000000", "v": "2.58200000", "n": 5, "x": false, "q": "939.30620000", "V": "2.32800000", "Q": "846.92640000", "B": "0"}}
 ```
 
 As you could see from the screenshot, the first response from the server is the acknowledgement of the subscription.
@@ -315,13 +316,13 @@ Note the Prometheus server configuration could be way more complicated than what
 Lets start Docker Desktop and run Prometheus server locally either using docker cmd or docker-compose at choice of yours. 
 When navigating to http://localhost:9090/targets，voilà ！Both the Prometheus server and the Metric endpoints for the websocekt are up and running !
 
-![prometheus1](/assets/blog_images/websocket-prometheus/prometheus1.png)
+![prometheus1]({{< get_image_link image_name="prometheus1.png" >}})
 
 As you can see both of the jobs that you specified in the prometheus.yml file are running !
 
 When navigate back to the graph page, you can easily enter "symbolPrice" in the search box and hit execute. You then should be able to see a graph like the following and you can highligh different lables to see the price change for each of the symbols. In may case I selected "BNBUSDT-high"
 
-![prometheus2](/assets/blog_images/websocket-prometheus/prometheus2.png)
+![prometheus2]({{< get_image_link image_name="prometheus2.png" >}})
 
 Congratulations! You"v just reach the end of this blog, I know right ? It is a rather long blog to read, but at least I found the excercis pretty interesting and when you see the graph in Prometheus, it somewhat feeling really comforting ! 
 

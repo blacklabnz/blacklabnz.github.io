@@ -1,0 +1,16 @@
+{{ range .Site.Params.socialIcons }}
+    {{ if (eq .name "linkedin") }}
+    <li>
+        <a href="{{ .url }}" target="_blank">
+            <i class="fab fa-linkedin-in fa-lg"></i>
+        </a>
+    </li>
+    {{ end }}
+    {{ if (eq .name "github") }}
+    <li>
+        <a href="{{ .url }}" target="_blank">
+            <i class="fab fa-github fa-lg"></i>
+        </a>
+    </li>
+    {{ end }}
+{{ end }}
