@@ -79,16 +79,7 @@
                 </a>
             </li>
             {{- end }}
-            <li>
-                <a href="http://linkedin.com" target="_blank">
-                    <i class="fab fa-linkedin-in fa-lg"></i>
-                </a>
-            </li>
-            <li>
-                <a href="https://github.com" target="_blank">
-                    <i class="fab fa-github fa-lg"></i>
-                </a>
-            </li>
+            {{ partial "contact.html" . }}
             <span class="logo-switches">
                 {{- if (not .Site.Params.disableThemeToggle) }}
                 <button id="theme-toggle" accesskey="t" title="(Alt + T)">
