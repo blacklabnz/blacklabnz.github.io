@@ -71,8 +71,8 @@ params:
 
     # home-info mode
     homeInfoParams:
-        Title: "Welcome to my tech blog! \U0001F44B"
-        Content: "A place I share learnings through my tech journey."
+        Title: "Welcome to my tech blog! \U0001F596"
+        Content: "Hi there, great to meet you here. \nMy name is Neil, currently working as a Data Engineer operating in the cloud. Previously I was working in DevOps capacity, focusing on building useful CICD pipelines, automations, APIs and else. Through out my career, I'd like to share some tips and tricks which I hope you find helpful !"
 
     socialIcons:
         - name: linkedin
@@ -116,18 +116,18 @@ menu:
           name: blogs
           url: /posts
           weight: 10
-        # - identifier: categories
-        #   name: categories
-        #   url: /categories/
-        #   weight: 20
+        - identifier: categories
+          name: categories
+          url: /categories/
+          weight: 20
         - identifier: tags
           name: tags
           url: /tags/
           weight: 30
-        - identifier: about
-          name: about
-          url: /about/
-          weight: 40
+        # - identifier: about
+        #   name: about
+        #   url: /about/
+        #   weight: 40
 # Read: https://github.com/adityatelange/hugo-PaperMod/wiki/FAQs#using-hugos-syntax-highlighter-chroma
 pygmentsUseClasses: true
 markup:
