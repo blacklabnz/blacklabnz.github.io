@@ -3,7 +3,7 @@ title:  "Consume Websocket stream and send to Prometheus in Python"
 date: 2022-03-18T23:39:13+13:00
 category: Technology
 tags: ["websocket", "prometheus", "python" ]
-categories: ["DevOps", "monitoring"]
+categories: ["devops", "monitoring"]
 ShowToc: true
 TocOpen: false
 weight: 1
@@ -273,7 +273,7 @@ SymbolPrice{symbols="BTCUSDT-low"} 37971.19
 SymbolPrice{symbols="DOGEUSDT-high"} 0.1113
 SymbolPrice{symbols="DOGEUSDT-low"} 0.1112
 ```
-<br>
+
 ## Part 4. Create Prometheus server and receive metrics data for visualization
 In this part you will need docker installed for creating Prometheus server in container. Please refer to official [documentation](https://prometheus.io/docs/prometheus/latest/installation/) for setup. 
 
