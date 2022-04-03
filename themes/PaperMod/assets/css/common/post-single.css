@@ -414,6 +414,10 @@ h6:hover .anchor {
 .paginav .prev,
 .paginav .next {
     width: 50%;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .paginav span:hover:not(.title) {
