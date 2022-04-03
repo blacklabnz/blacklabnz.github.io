@@ -1,13 +1,12 @@
-.logo
-#cursor {
+.logo #cursor {
     -webkit-animation: cursor 0.8s infinite;
     animation: cursor 0.8s infinite;
     background: #57fe51;
     border-radius: 1px;
     display: inline-block;
-    height: 1.5rem;
+    height: 1.2rem;
     width: 10px;
-    vertical-align: sub;
+    vertical-align: text-top;
 }
 
 .logo ul {
@@ -40,4 +39,28 @@
     to {
         opacity: 0
     }
+}
+
+.logo_text{
+    font-size: 20px;
+}
+
+.header__inner {
+    justify-content: space-between;
+    margin: 0 auto;
+    max-width: 100%;
+    max-width: calc(var(--nav-width) + var(--gap) * 2);
+    align-items: center;
+    display: flex;
+}
+
+.header__right {
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+    margin: 10px;
+}
+
+.logo-switches {
+    margin: 0 !important;
 }

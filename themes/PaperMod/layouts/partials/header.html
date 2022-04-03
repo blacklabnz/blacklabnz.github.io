@@ -40,8 +40,9 @@
 {{- end }}
 
 <header class="header">
-    <nav class="nav">
-        <div class="logo">
+
+    <span class="header__inner">
+        <span class="logo">
             {{- $label_text := (.Site.Params.label.text | default .Site.Title) }}
             <!-- {{- if .Site.Title }}
             <a href="{{ "" | absLangURL }}" accesskey="h" title="{{ $label_text }} (Alt + H)">
@@ -52,7 +53,7 @@
                 {{- $label_text -}}
             </a>
             {{- end }} -->
-            <ul><i class="fas fa-terminal"></i></ul>
+            <!-- <ul><i class="fas fa-terminal"></i></ul>
             <ul>
                 <a href="{{ "" | absLangURL }}" accesskey="h" title="{{ $label_text }} (Alt + H)">
                     {{- $label_text -}}
@@ -60,51 +61,58 @@
             </ul>
             <ul>
                 <span id="cursor"></span>
-            </ul>
-        </div>
-        {{- $currentPage := . }}
-        <ul id="menu">
-            {{- range .Site.Menus.main }}
-            {{- $menu_item_url := (cond (strings.HasSuffix .URL "/") .URL (printf "%s/" .URL) ) | absLangURL }}
-            {{- $page_url:= $currentPage.Permalink | absLangURL }}
-            {{- $is_search := eq ($.Site.GetPage .KeyName).Layout `search` }}
-            <li>
-                <a href="{{ .URL | absLangURL }}" title="{{ .Title | default .Name }} {{- cond $is_search (" (Alt + /)" | safeHTMLAttr) ("" | safeHTMLAttr ) }}"
-                {{- cond $is_search (" accesskey=/" | safeHTMLAttr) ("" | safeHTMLAttr ) }}>
-                    <span {{- if eq $menu_item_url $page_url }} class="active" {{- end }}>
-                        {{- .Pre }}
-                        {{- .Name -}}
-                        {{ .Post -}}
-                    </span>
-                </a>
-            </li>
-            {{- end }}
-            {{ partial "contact.html" . }}
-            <span class="logo-switches">
-                {{- if (not .Site.Params.disableThemeToggle) }}
-                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
-                    <!-- <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                    </svg>
-                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="5"></circle>
-                        <line x1="12" y1="1" x2="12" y2="3"></line>
-                        <line x1="12" y1="21" x2="12" y2="23"></line>
-                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                        <line x1="1" y1="12" x2="3" y2="12"></line>
-                        <line x1="21" y1="12" x2="23" y2="12"></line>
-                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-                    </svg> -->
-                    <i class="fas fa-lightbulb"></i>
-                </button>
-                {{- end }}
-
+            </ul> -->
+            <a href="{{ "" | absLangURL }}" accesskey="h" title="{{ $label_text }} (Alt + H)">
+                <span><i class="fas fa-terminal fa-sm"></i></span>
+                <span class="logo_text">{{- $label_text -}}</span>
+                <span id="cursor"></span>
+            </a>
+        </span>
+        <span class="header__right">
+            <div class="dropdown">
+                <span class="dropbtn"><i class="fas fa-bars"></i></span>
+                <nav id="dropdonwBox" class="dropdown-content">
+                    {{- $currentPage := . }}
+                    <ul id="menu-mobile">
+                        {{- range .Site.Menus.main }}
+                        {{- $menu_item_url := (cond (strings.HasSuffix .URL "/") .URL (printf "%s/" .URL) ) | absLangURL }}
+                        {{- $page_url:= $currentPage.Permalink | absLangURL }}
+                        {{- $is_search := eq ($.Site.GetPage .KeyName).Layout `search` }}
+                        <li>
+                            <a href="{{ .URL | absLangURL }}" title="{{ .Title | default .Name }} {{- cond $is_search (" (Alt + /)" | safeHTMLAttr) ("" | safeHTMLAttr ) }}"
+                            {{- cond $is_search (" accesskey=/" | safeHTMLAttr) ("" | safeHTMLAttr ) }}>
+                                <span {{- if eq $menu_item_url $page_url }} class="active" {{- end }}>
+                                    {{- .Pre }}
+                                    {{- .Name -}}
+                                    {{ .Post -}}
+                                </span>
+                            </a>
+                        </li>
+                        {{- end }}
+                    </ul>
+                </nav>
+            </div>            
+            <nav class="nav">
+                {{- $currentPage := . }}
+                <ul id="menu">
+                    {{- range .Site.Menus.main }}
+                    {{- $menu_item_url := (cond (strings.HasSuffix .URL "/") .URL (printf "%s/" .URL) ) | absLangURL }}
+                    {{- $page_url:= $currentPage.Permalink | absLangURL }}
+                    {{- $is_search := eq ($.Site.GetPage .KeyName).Layout `search` }}
+                    <li>
+                        <a href="{{ .URL | absLangURL }}" title="{{ .Title | default .Name }} {{- cond $is_search (" (Alt + /)" | safeHTMLAttr) ("" | safeHTMLAttr ) }}"
+                        {{- cond $is_search (" accesskey=/" | safeHTMLAttr) ("" | safeHTMLAttr ) }}>
+                            <span {{- if eq $menu_item_url $page_url }} class="active" {{- end }}>
+                                {{- .Pre }}
+                                {{- .Name -}}
+                                {{ .Post -}}
+                            </span>
+                        </a>
+                    </li>
+                    {{- end }}
+                </ul>
+            </nav>
+            <ul class="logo-switches">
                 {{- $lang := .Lang}}
                 {{- $separator := or $label_text (not .Site.Params.disableThemeToggle)}}
                 {{- with $.Site.Home.AllTranslations }}
@@ -126,7 +134,31 @@
                     {{- end}}
                 </ul>
                 {{- end }}
-            </span>
-        </ul>
-    </nav>
+            </ul>
+            {{- if (not .Site.Params.disableThemeToggle) }}
+            <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+                <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+            </button>
+            {{- end }}
+        </span>
+
+
+    </span>
 </header>
