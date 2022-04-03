@@ -15,6 +15,12 @@ minify:
     disableXML: true
     minifyOutput: true
 
+outputs:
+    home:
+        - HTML
+        - RSS
+        - JSON
+
 params:
     env: production # to enable google analytics, opengraph, twitter-cards and schema.
     title: blacklabnz
@@ -102,14 +108,14 @@ params:
 
     # for search
     # https://fusejs.io/api/options.html
-    fuseOpts:
-        isCaseSensitive: false
-        shouldSort: true
-        location: 0
-        distance: 1000
-        threshold: 0.4
-        minMatchCharLength: 0
-        keys: ["title", "permalink", "summary", "content"]
+    # fuseOpts:
+    #     isCaseSensitive: false
+    #     shouldSort: true
+    #     location: 0
+    #     distance: 1000
+    #     threshold: 0.4
+    #     minMatchCharLength: 0
+    #     keys: ["title", "permalink", "summary", "content"]
 menu:
     main:
         - identifier: posts
@@ -124,10 +130,15 @@ menu:
           name: tags
           url: /tags/
           weight: 30
+        - identifier: search
+          name: search
+          url: /search/
+          weight: 40
         # - identifier: about
         #   name: about
         #   url: /about/
         #   weight: 40
+
 # Read: https://github.com/adityatelange/hugo-PaperMod/wiki/FAQs#using-hugos-syntax-highlighter-chroma
 pygmentsUseClasses: true
 markup:
