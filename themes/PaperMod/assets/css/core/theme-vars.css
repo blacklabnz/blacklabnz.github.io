@@ -16,6 +16,8 @@
     --code-bg: rgb(245, 245, 245);
     --border: rgb(238, 238, 238);
     --note: rgb(239, 234, 168);
+    /* --utterance-light: block;
+    --utterance-dark: none; */
 }
 
 .dark {
@@ -29,6 +31,8 @@
     --code-bg: rgb(55, 56, 62);
     --border: rgb(51, 51, 51);
     --note: rgb(118, 114, 49);
+    /* --utterance-light: none;
+    --utterance-dark: block; */
 }
 
 .list {
@@ -37,4 +41,8 @@
 
 .dark.list {
     background: var(--theme);
+}
+
+.utterances {
+    max-width: 100% !important;
 }

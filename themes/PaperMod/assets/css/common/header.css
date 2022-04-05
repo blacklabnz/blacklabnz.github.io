@@ -43,6 +43,8 @@
 button#theme-toggle {
     font-size: 26px;
     margin: auto 4px;
+    /* Add this line to make header high consistent when switching width */
+    line-height: var(--header-height);
 }
 
 body.dark #moon {
