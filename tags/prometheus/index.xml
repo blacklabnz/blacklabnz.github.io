@@ -16,7 +16,7 @@
       <pubDate>Fri, 18 Mar 2022 23:39:13 +1300</pubDate>
       
       <guid>https://blacklabnz.github.io/posts/websocket-prometheus/</guid>
-      <description>Recently I was tasked with consuming data from websocket, analyse it and then send data to Prometheus. The theory is pretty straight forward: getting data from websocket API in a stream and analyse and take the data points and send it to prometheus for visulization. In this blog you will have all the steps and code needed to reporduce this flow. With this in mind, I decided using python to achieve all these.</description>
+      <description>Recently I was tasked with consuming data from websocket, analyze it and then send data to Prometheus. The theory is pretty straight forward: getting data from websocket API in a stream and analyze and take the data points and send it to prometheus for visualization. In this blog you will have all the steps and code needed to reproduce this flow. With this in mind, I decided using python to achieve all these.</description>
     </item>
     
   </channel>

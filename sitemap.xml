@@ -5,14 +5,50 @@
     <loc>https://blacklabnz.github.io/posts/websocket-prometheus/</loc>
     <lastmod>2022-03-18T23:39:13+13:00</lastmod>
   </url><url>
+    <loc>https://blacklabnz.github.io/categories/</loc>
+    <lastmod>2022-03-28T23:39:13+13:00</lastmod>
+  </url><url>
+    <loc>https://blacklabnz.github.io/tags/databricks/</loc>
+    <lastmod>2022-03-28T23:39:13+13:00</lastmod>
+  </url><url>
+    <loc>https://blacklabnz.github.io/categories/databricks/</loc>
+    <lastmod>2022-03-28T23:39:13+13:00</lastmod>
+  </url><url>
+    <loc>https://blacklabnz.github.io/tags/databricks-secure-connectivity/</loc>
+    <lastmod>2022-03-28T23:39:13+13:00</lastmod>
+  </url><url>
+    <loc>https://blacklabnz.github.io/tags/databricks-vnet-injection/</loc>
+    <lastmod>2022-03-28T23:39:13+13:00</lastmod>
+  </url><url>
+    <loc>https://blacklabnz.github.io/categories/infrastructure-as-code/</loc>
+    <lastmod>2022-03-28T23:39:13+13:00</lastmod>
+  </url><url>
+    <loc>https://blacklabnz.github.io/tags/keyvault-backed-secret-scope/</loc>
+    <lastmod>2022-03-28T23:39:13+13:00</lastmod>
+  </url><url>
+    <loc>https://blacklabnz.github.io/posts/</loc>
+    <lastmod>2022-03-28T23:39:13+13:00</lastmod>
+  </url><url>
+    <loc>https://blacklabnz.github.io/tags/private-endpoints/</loc>
+    <lastmod>2022-03-28T23:39:13+13:00</lastmod>
+  </url><url>
+    <loc>https://blacklabnz.github.io/posts/databricks-secure/</loc>
+    <lastmod>2022-03-28T23:39:13+13:00</lastmod>
+  </url><url>
+    <loc>https://blacklabnz.github.io/categories/security/</loc>
+    <lastmod>2022-03-28T23:39:13+13:00</lastmod>
+  </url><url>
+    <loc>https://blacklabnz.github.io/tags/</loc>
+    <lastmod>2022-03-28T23:39:13+13:00</lastmod>
+  </url><url>
+    <loc>https://blacklabnz.github.io/tags/terraform/</loc>
+    <lastmod>2022-03-28T23:39:13+13:00</lastmod>
+  </url><url>
     <loc>https://blacklabnz.github.io/about/</loc>
     <lastmod>2022-03-20T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://blacklabnz.github.io/</loc>
     <lastmod>2022-03-20T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://blacklabnz.github.io/categories/</loc>
-    <lastmod>2022-03-18T23:39:13+13:00</lastmod>
   </url><url>
     <loc>https://blacklabnz.github.io/categories/devops/</loc>
     <lastmod>2022-03-18T23:39:13+13:00</lastmod>
@@ -20,16 +56,10 @@
     <loc>https://blacklabnz.github.io/categories/monitoring/</loc>
     <lastmod>2022-03-18T23:39:13+13:00</lastmod>
   </url><url>
-    <loc>https://blacklabnz.github.io/posts/</loc>
-    <lastmod>2022-03-18T23:39:13+13:00</lastmod>
-  </url><url>
     <loc>https://blacklabnz.github.io/tags/prometheus/</loc>
     <lastmod>2022-03-18T23:39:13+13:00</lastmod>
   </url><url>
     <loc>https://blacklabnz.github.io/tags/python/</loc>
-    <lastmod>2022-03-18T23:39:13+13:00</lastmod>
-  </url><url>
-    <loc>https://blacklabnz.github.io/tags/</loc>
     <lastmod>2022-03-18T23:39:13+13:00</lastmod>
   </url><url>
     <loc>https://blacklabnz.github.io/tags/websocket/</loc>
