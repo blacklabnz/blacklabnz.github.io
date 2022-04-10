@@ -3,15 +3,15 @@ title:  "Consume Websocket stream and send to Prometheus in Python"
 date: 2022-03-18T23:39:13+13:00
 category: Technology
 tags: ["websocket", "prometheus", "python" ]
-categories: ["DevOps", "monitoring"]
+categories: ["devops", "monitoring"]
 ShowToc: true
 TocOpen: false
 weight: 1
 ---
 
-Recently I was tasked with consuming data from websocket, analyse it and then send data to Prometheus.
-The theory is pretty straight forward: getting data from websocket API in a stream and analyse and take the data points and send it to prometheus for visulization.
-In this blog you will have all the steps and code needed to reporduce this flow.
+Recently I was tasked with consuming data from websocket, analyze it and then send data to Prometheus.
+The theory is pretty straight forward: getting data from websocket API in a stream and analyze and take the data points and send it to prometheus for visualization.
+In this blog you will have all the steps and code needed to reproduce this flow.
 With this in mind, I decided using python to achieve all these.
 
 ## Part 1. Websocket VS Rest reminder
@@ -21,11 +21,11 @@ Before we start, I would like to have a bit of revision on Websocket API and how
 ![websocketvsrest]({{< get_image_link image_name="websocketvsrest.png" >}})
 
 
-The diagram I took from internet explains it quite well. In simple term, you interact with REST API with a request and response fashion wheraes in websocket there is a two way connection established during interaction lifecycle therefore you dont need to constantly send request to server for retrieving data. At the end of the interaction, the two way connection is close.
+The diagram I took from internet explains it quite well. In simple term, you interact with REST API with a request and response fashion whereas in websocket there is a two way connection established during interaction lifecycle therefore you don't need to constantly send request to server for retrieving data. At the end of the interaction, the two way connection is close.
 
 ## Part 2. Consuming a websocket API
 
-You could easily find some publicly availabel websocket API, the one I used for this blog is from Binance, one of the platform used by coin traders. Though myself is not doing any coin trading nor receiving any sponsorship from them. 
+You could easily find some publicly available websocket API, the one I used for this blog is from Binance, one of the platform used by coin traders. Though myself is not doing any coin trading nor receiving any sponsorship from them. 
 They have very detailed API documentation on their [Spot API](https://github.com/binance/binance-spot-api-docs). 
 
 The following code snippet can be used to connect to websocket API:
@@ -62,7 +62,7 @@ ws.run_forever()
 ### Quick explanation
 
 Line 4 defines the websocket url, the details of this endpoint can be found [here](https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-streams.md#klinecandlestick-streams).
-"/bnbusdt@kline_1m" means retrieving data from the kline stream for bnb vs usdt, what is so called a symbol, these are cyrypto coin terminologies which you can fine richer explanations else where. 
+"/bnbusdt@kline_1m" means retrieving data from the kline stream for bnb vs usdt, what is so called a symbol, these are crypto coin terminologies which you can fine richer explanations else where. 
 
 Line 6 to line 17 defines the callback function with minimal functionality when message is received from the server.
 More details can be found in [websocket-client](https://websocket-client.readthedocs.io/en/latest/) official documentation.
@@ -82,7 +82,7 @@ Connection closed
 ### Futher explore the API
 
 Previous step works fine with a single symbol, what if in the websocket I need data from more symbol or even in any websockets ?? 
-The websockert API kindly offers subscription mode, with which you can subscribe multiple symbols and get the data back within the same websocket connection. refer to the following code for this:
+The websocket API kindly offers subscription mode, with which you can subscribe multiple symbols and get the data back within the same websocket connection. refer to the following code for this:
 
 ```python
 import json
@@ -117,7 +117,7 @@ ws.close()
 ### Quick explanation
 
 Line 6-17 creates a websocket connection, the first action is to send a message to endpoint to subscribe to steams that are of interests. 
-The playload of the subscription is like this:
+The payload of the subscription is like this:
 
 ```json
 {
@@ -152,9 +152,9 @@ When we inspect the console output when running the above python code we also ge
 ```
 
 As you could see from the screenshot, the first response from the server is the acknowledgement of the subscription.
-The data following the acknowledgement is the data for the symbols(remember the crypto trading jargon?), and indead we are receiving data for all the symbols we have subscribed to !
+The data following the acknowledgement is the data for the symbols(remember the crypto trading jargon?), and indeed we are receiving data for all the symbols we have subscribed to !
 
-## Part 3. Add prometheus-client and create metric endpiont
+## Part 3. Add prometheus-client and create metric endpoint
 
 To start with part, first we want to add prometheus client to our code so that we could see metric being sent. 
 
@@ -212,7 +212,7 @@ BTCUSDT 38153.01000000 38170.16000000
 ```
 
 Now lets start ingesting data to Prometheus using [prometheus-client](https://pypi.org/project/prometheus-client).
-Obviously we can spent our whole night trying to understand the nitty gritty of prometheus-client, but that is not the purpose right ? Our purpose here is to the things going end to end from websocket to prometheus. So let"s grab just what we need for this excercise ! 
+Obviously we can spent our whole night trying to understand the nitty gritty of prometheus-client, but that is not the purpose right ? Our purpose here is to the things going end to end from websocket to prometheus. So let"s grab just what we need for this exercise ! 
 
 ```python
 import json
@@ -234,7 +234,7 @@ def on_message(message):
 ```
 
 ### Quick explanation
-Line 5 create a Gauge object, a Guage is a type of metrics to record a value. Like mentioned before there are other types of metrics worth exploring, sounds like a place to spend our "tech time".
+Line 5 create a Gauge object, a Gauge is a type of metrics to record a value. Like mentioned before there are other types of metrics worth exploring, sounds like a place to spend our "tech time".
 
 Line 6 create a Prometheus endpoint where you could see the metrics at http://localhost:8080.
 
@@ -273,11 +273,11 @@ SymbolPrice{symbols="BTCUSDT-low"} 37971.19
 SymbolPrice{symbols="DOGEUSDT-high"} 0.1113
 SymbolPrice{symbols="DOGEUSDT-low"} 0.1112
 ```
-<br>
+
 ## Part 4. Create Prometheus server and receive metrics data for visualization
 In this part you will need docker installed for creating Prometheus server in container. Please refer to official [documentation](https://prometheus.io/docs/prometheus/latest/installation/) for setup. 
 
-Obvioiusly you could run docker cmd for this, I have also got a docker-compose.yml here as well.
+Obviously you could run docker cmd for this, I have also got a docker-compose.yml here as well.
 
 ```yml
 version: "3.9"
@@ -308,23 +308,23 @@ scrape_configs:
 
 ### Quick explanation
 Line 8 specifies the port of Prometheus server running locally
-Line 11 specifies the port and DNS name of the metric endpoint created in Part 3. Note the dns is "hosrt.docker.internal", this worked for me when running containers with [Docker Destop](https://www.docker.com/products/docker-desktop).
+Line 11 specifies the port and DNS name of the metric endpoint created in Part 3. Note the dns is "host.docker.internal", this worked for me when running containers with [Docker Desktop](https://www.docker.com/products/docker-desktop).
 
 {{< note >}}
 Note the Prometheus server configuration could be way more complicated than what we are doing here.Again the purpose of this blog is not to setup prometheus for production, we only what to tip our teo on the surface and have a feel on it!
 {{< /note >}}
 
 Lets start Docker Desktop and run Prometheus server locally either using docker cmd or docker-compose at choice of yours. 
-When navigating to http://localhost:9090/targets，voilà ！Both the Prometheus server and the Metric endpoints for the websocekt are up and running !
+When navigating to http://localhost:9090/targets，voilà ！Both the Prometheus server and the Metric endpoints for the websocket are up and running !
 
 ![prometheus1]({{< get_image_link image_name="prometheus1.png" >}})
 
 As you can see both of the jobs that you specified in the prometheus.yml file are running !
 
-When navigate back to the graph page, you can easily enter "symbolPrice" in the search box and hit execute. You then should be able to see a graph like the following and you can highligh different lables to see the price change for each of the symbols. In may case I selected "BNBUSDT-high"
+When navigate back to the graph page, you can easily enter "symbolPrice" in the search box and hit execute. You then should be able to see a graph like the following and you can highlight different labels to see the price change for each of the symbols. In may case I selected "BNBUSDT-high"
 
 ![prometheus2]({{< get_image_link image_name="prometheus2.png" >}})
 
-Congratulations! You"v just reach the end of this blog, I know right ? It is a rather long blog to read, but at least I found the excercis pretty interesting and when you see the graph in Prometheus, it somewhat feeling really comforting ! 
+Congratulations! You"v just reach the end of this blog, I know right ? It is a rather long blog to read, but at least I found the exercise pretty interesting and when you see the graph in Prometheus, it somewhat feeling really comforting ! 
 
 Thanks for you patience, see you at my next blog !! 
