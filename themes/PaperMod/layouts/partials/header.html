@@ -91,6 +91,9 @@
                         {{- end }}
                     </ul>
                 </nav>
+                <!-- following 2 lines used by menu toggle button -->
+                {{- $menu := slice (resources.Get "js/menu.js") | resources.Concat "assets/js/menu.js" | minify }}
+                <script src="{{ $menu.RelPermalink }}"></script>
             </div>            
             <nav class="nav">
                 {{- $currentPage := . }}
