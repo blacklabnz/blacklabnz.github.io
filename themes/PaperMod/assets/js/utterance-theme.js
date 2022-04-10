@@ -13,8 +13,7 @@ if (container !== null) {
     }
 }
 
-window.onclick = function (event) {
-
+window.addEventListener("click", (event) => {
     var container = document.getElementsByClassName("utterances-frame")[0];
     var utteranceUrl = container.getAttribute('src');
     var prefTheme = localStorage.getItem("pref-theme");
@@ -34,4 +33,4 @@ window.onclick = function (event) {
 
         container.setAttribute("src", newUtteranceUrl);
     }
-}
+})
