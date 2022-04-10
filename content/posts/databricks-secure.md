@@ -3,7 +3,7 @@ title: "Secure Databricks cluster with vNet injection and access resources via A
 date: 2022-03-28T23:39:13+13:00
 draft: false
 tags: ["terraform", "databricks", "private endpoints", "databricks secure connectivity", "databricks vNet injection", "keyvault backed secret scope"]
-categories: ["databricks", "infrastructure as code", "security"]
+categories: ["databricks", "infrastructure as code", "security", "terraform"]
 author: "Neil Xu"
 ShowToc: true
 ---
