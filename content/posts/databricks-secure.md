@@ -604,7 +604,7 @@ spark.conf.set("fs.azure.account.auth.type", "OAuth")
 spark.conf.set("fs.azure.account.oauth.provider.type", "org.apache.hadoop.fs.azurebfs.oauth2.ClientCredsTokenProvider")
 spark.conf.set("fs.azure.account.oauth2.client.id", dbutils.secrets.get(scope="keyvault-managed",key="sp-id"))
 spark.conf.set("fs.azure.account.oauth2.client.secret", dbutils.secrets.get(scope="keyvault-managed",key="sp-secret"))
-spark.conf.set("fs.azure.account.oauth2.client.endpoint", "https://login.microsoftonline.com/e65107ae-deaa-4f76-b79e-c4b5067a5929/oauth2/token")
+spark.conf.set("fs.azure.account.oauth2.client.endpoint", "https://login.microsoftonline.com/xxxx-xxx-xxxxxx-xxxxxx/oauth2/token")
 
 # COMMAND ----------
 df = spark.read.json(f"abfss://{adls_container}@{adls_name}.dfs.core.windows.net/pubapis.json")
