@@ -1,6 +1,7 @@
 ---
 title:  "Consume Websocket stream and send to Prometheus in Python"
 date: 2022-03-18T23:39:13+13:00
+lastmod: "2022-03-20"
 category: Technology
 tags: ["websocket", "prometheus", "python" ]
 categories: ["devops", "monitoring"]

@@ -1,6 +1,7 @@
 ---
 title: "Secure Databricks cluster with vNet injection and access resources via Azure private endpoint"
 date: 2022-03-28T23:39:13+13:00
+lastmod: "2022-04-11"
 draft: false
 tags: ["terraform", "databricks", "private endpoints", "databricks secure connectivity", "databricks vNet injection", "keyvault backed secret scope"]
 categories: ["databricks", "infrastructure as code", "security", "terraform"]
@@ -603,19 +604,36 @@ spark.conf.set("fs.azure.account.auth.type", "OAuth")
 spark.conf.set("fs.azure.account.oauth.provider.type", "org.apache.hadoop.fs.azurebfs.oauth2.ClientCredsTokenProvider")
 spark.conf.set("fs.azure.account.oauth2.client.id", dbutils.secrets.get(scope="keyvault-managed",key="sp-id"))
 spark.conf.set("fs.azure.account.oauth2.client.secret", dbutils.secrets.get(scope="keyvault-managed",key="sp-secret"))
-spark.conf.set("fs.azure.account.oauth2.client.endpoint", "https://login.microsoftonline.com/e65107ae-deaa-4f76-b79e-c4b5067a5929/oauth2/token")
+spark.conf.set("fs.azure.account.oauth2.client.endpoint", "https://login.microsoftonline.com/xxxx-xxx-xxxxxx-xxxxxx/oauth2/token")
 
 # COMMAND ----------
 df = spark.read.json(f"abfss://{adls_container}@{adls_name}.dfs.core.windows.net/pubapis.json")
 # COMMAND ----------
 df.show()
 ```
+What this notebook does is quite simple, it grabs the secret of a service principal from keyvault secret scope and use that to auth to Azure.
+Once authorized it will read a json file into dataframe. Please seethe outcome of the notebook run in the following screen shot.
 ![notebook2]({{< get_image_link image_name="notebook2.png" >}})
+
 To be able to achieve this, you will need the following: 
 1. another service principal that has the role "Storage blob contributor" on the storage account
 2. having the application id and secret saved in the Keyvault we created as "sp-id" and "sp-secret"
 
-I have included these two python snippet you need for running the notebook to validate.
+I have included these two notebooks in the repo, you will find them in the notebooks folder.
+
+To deploy the notebooks to our databricks workspace, you could add the following to your main.tf file as part of the deployment.
+```tf
+resource "databricks_notebook" "notbooks" {
+  for_each = fileset("${path.module}/notebooks", "*")
+  source = "${path.module}/notebooks/${each.key}"
+  path   = "/validation/${element(split(".", each.key), 0)}"
+  language = "PYTHON"
+}
+```
+This block iterate through the notebooks folder and deploy the notebook in a folder called "validated" in the workspace.
+{{< note >}}
+Note usually you would not deploy your notebooks as part of IaC efforts, these would otherwise be regarded as the "application" artifacts. But for simplicity of our demo, they are deployed in the same IaC code flow.
+{{< /note >}}
 
 At this point our lab has reached the end, hope you enjoyed the extra efforts needed to make your databricks cluster more secure.
 
