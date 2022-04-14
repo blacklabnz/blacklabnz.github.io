@@ -42,7 +42,7 @@ For the storage account private endpoint, well, we could have deployed that into
 For simplifying our demo, we are going to put all our terraform resources in the main.tf file. In real world development, the best practice would be modularize any components that are reusable.
 We are also simplifying the terraform variables with locals, you will find the only the authentication related values are kept in variables and passed in with values.tfvars file. 
 
-For your convenience, you can download tf module required for this lab from my github repo: [secure-databricks](https://github.com/blacklabnz/secure-databricks) 
+For your convenience, you can download tf module required for this lab from my github repo: [secure-databricks-terraform](https://github.com/blacklabnz/secure-databricks-terraform) 
 
 First thing before carry on to the next part is to setup the providers. 
 
