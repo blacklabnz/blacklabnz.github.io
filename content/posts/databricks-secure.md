@@ -491,7 +491,7 @@ Line 49-55 creates a private DNS record using the private ip address of the netw
 {{< note >}}
 Note when creating private endpoint, there will be a network interface attached to it which gets a private ip address allocated in the subnet range.
 {{< /note >}}
-Line
+
 ### 4.2 Keyvault with private endpoint and private DNS zone
 This one is not too bad either, keyvualt with private endpoint deployed to the same spoke network with similar setup on the private DNS zone, vNet linkage and dns records
 ```tf
@@ -637,4 +637,4 @@ Note usually you would not deploy your notebooks as part of IaC efforts, these w
 
 At this point our lab has reached the end, hope you enjoyed the extra efforts needed to make your databricks cluster more secure.
 
-Thanks for you time and patience with me !! see you next time !
+If like the content please leave your comments below, if you fine issues with the content, please also comment below. Thanks for your time and patience with me !! 
