@@ -1,14 +1,14 @@
 ---
 title: "Azure networking: Hub and spoke topology with terraform"
 date: "2022-04-11"
-draft: false
+draft: true
 tags: ["terraform", "hub and spoke", "private endpoints", "azure firewall", "forced tunneling"]
 categories: ["networking", "security"]
 ---
 The hub and spoke topology has been widely adopted for enterprise production deployment.
 In this lab, let put on our network engineer hat and get our hand dirty on Azure Hub and spoke topology with one of the popular IaC -- Terraform.
 Lets have a look at the high level architecture first.
-[hubandspoke]()
+![hubandspoke]({{< get_image_link image_name="hub-spoke.png" >}})
 The essence of the topology is, but the name of it, having all traffic routed to hub network before forwarded to spoke network. In hub network Azure firewall will be deployed, processing and logging all the traffic. 
 In spoke user defined route is configured to route the traffic to hub, one the traffic arrives hub and processed by firewall, policy will be applied depending on the requirement to either allow or deny.
 We don't have the luxury to have a on-prem VPN device with a VPN connection or express route, hence we are using another vNet and connect that to the hub via vNet gateway to simulate traffic passing through a gateway.
