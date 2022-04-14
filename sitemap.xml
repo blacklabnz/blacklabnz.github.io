@@ -5,37 +5,7 @@
     <loc>https://blacklabnz.github.io/posts/websocket-prometheus/</loc>
     <lastmod>2022-03-20T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://blacklabnz.github.io/tags/azure-firewall/</loc>
-    <lastmod>2022-04-11T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://blacklabnz.github.io/posts/hub-spoke/</loc>
-    <lastmod>2022-04-11T00:00:00+00:00</lastmod>
-  </url><url>
     <loc>https://blacklabnz.github.io/categories/</loc>
-    <lastmod>2022-04-11T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://blacklabnz.github.io/tags/forced-tunneling/</loc>
-    <lastmod>2022-04-11T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://blacklabnz.github.io/tags/hub-and-spoke/</loc>
-    <lastmod>2022-04-11T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://blacklabnz.github.io/categories/networking/</loc>
-    <lastmod>2022-04-11T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://blacklabnz.github.io/posts/</loc>
-    <lastmod>2022-04-11T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://blacklabnz.github.io/tags/private-endpoints/</loc>
-    <lastmod>2022-04-11T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://blacklabnz.github.io/categories/security/</loc>
-    <lastmod>2022-04-11T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://blacklabnz.github.io/tags/</loc>
-    <lastmod>2022-04-11T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://blacklabnz.github.io/tags/terraform/</loc>
     <lastmod>2022-04-11T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://blacklabnz.github.io/tags/databricks/</loc>
@@ -56,7 +26,22 @@
     <loc>https://blacklabnz.github.io/tags/keyvault-backed-secret-scope/</loc>
     <lastmod>2022-04-11T00:00:00+00:00</lastmod>
   </url><url>
+    <loc>https://blacklabnz.github.io/posts/</loc>
+    <lastmod>2022-04-11T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://blacklabnz.github.io/tags/private-endpoints/</loc>
+    <lastmod>2022-04-11T00:00:00+00:00</lastmod>
+  </url><url>
     <loc>https://blacklabnz.github.io/posts/databricks-secure/</loc>
+    <lastmod>2022-04-11T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://blacklabnz.github.io/categories/security/</loc>
+    <lastmod>2022-04-11T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://blacklabnz.github.io/tags/</loc>
+    <lastmod>2022-04-11T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://blacklabnz.github.io/tags/terraform/</loc>
     <lastmod>2022-04-11T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://blacklabnz.github.io/categories/terraform/</loc>

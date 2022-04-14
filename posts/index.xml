@@ -9,7 +9,7 @@
       <link>https://blacklabnz.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
     </image>
     <generator>Hugo -- gohugo.io</generator>
-    <lastBuildDate>Mon, 11 Apr 2022 00:00:00 +0000</lastBuildDate><atom:link href="https://blacklabnz.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 28 Mar 2022 23:39:13 +1300</lastBuildDate><atom:link href="https://blacklabnz.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Consume Websocket stream and send to Prometheus in Python</title>
       <link>https://blacklabnz.github.io/posts/websocket-prometheus/</link>
@@ -17,15 +17,6 @@
       
       <guid>https://blacklabnz.github.io/posts/websocket-prometheus/</guid>
       <description>Recently I was tasked with consuming data from websocket, analyze it and then send data to Prometheus. The theory is pretty straight forward: getting data from websocket API in a stream and analyze and take the data points and send it to prometheus for visualization. In this blog you will have all the steps and code needed to reproduce this flow. With this in mind, I decided using python to achieve all these.</description>
-    </item>
-    
-    <item>
-      <title>Azure networking: Hub and spoke topology with terraform</title>
-      <link>https://blacklabnz.github.io/posts/hub-spoke/</link>
-      <pubDate>Mon, 11 Apr 2022 00:00:00 +0000</pubDate>
-      
-      <guid>https://blacklabnz.github.io/posts/hub-spoke/</guid>
-      <description>The hub and spoke topology has been widely adopted for enterprise production deployment. In this lab, let put on our network engineer hat and get our hand dirty on Azure Hub and spoke topology with one of the popular IaC &amp;ndash; Terraform. Lets have a look at the high level architecture first. hubandspoke The essence of the topology is, but the name of it, having all traffic routed to hub network before forwarded to spoke network.</description>
     </item>
     
     <item>

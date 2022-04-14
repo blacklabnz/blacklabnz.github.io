@@ -9,52 +9,7 @@
       <link>https://blacklabnz.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
     </image>
     <generator>Hugo -- gohugo.io</generator>
-    <lastBuildDate>Mon, 11 Apr 2022 00:00:00 +0000</lastBuildDate><atom:link href="https://blacklabnz.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>azure firewall</title>
-      <link>https://blacklabnz.github.io/tags/azure-firewall/</link>
-      <pubDate>Mon, 11 Apr 2022 00:00:00 +0000</pubDate>
-      
-      <guid>https://blacklabnz.github.io/tags/azure-firewall/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>forced tunneling</title>
-      <link>https://blacklabnz.github.io/tags/forced-tunneling/</link>
-      <pubDate>Mon, 11 Apr 2022 00:00:00 +0000</pubDate>
-      
-      <guid>https://blacklabnz.github.io/tags/forced-tunneling/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>hub and spoke</title>
-      <link>https://blacklabnz.github.io/tags/hub-and-spoke/</link>
-      <pubDate>Mon, 11 Apr 2022 00:00:00 +0000</pubDate>
-      
-      <guid>https://blacklabnz.github.io/tags/hub-and-spoke/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>private endpoints</title>
-      <link>https://blacklabnz.github.io/tags/private-endpoints/</link>
-      <pubDate>Mon, 11 Apr 2022 00:00:00 +0000</pubDate>
-      
-      <guid>https://blacklabnz.github.io/tags/private-endpoints/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>terraform</title>
-      <link>https://blacklabnz.github.io/tags/terraform/</link>
-      <pubDate>Mon, 11 Apr 2022 00:00:00 +0000</pubDate>
-      
-      <guid>https://blacklabnz.github.io/tags/terraform/</guid>
-      <description></description>
-    </item>
-    
+    <lastBuildDate>Mon, 28 Mar 2022 23:39:13 +1300</lastBuildDate><atom:link href="https://blacklabnz.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>databricks</title>
       <link>https://blacklabnz.github.io/tags/databricks/</link>
@@ -88,6 +43,24 @@
       <pubDate>Mon, 28 Mar 2022 23:39:13 +1300</pubDate>
       
       <guid>https://blacklabnz.github.io/tags/keyvault-backed-secret-scope/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>private endpoints</title>
+      <link>https://blacklabnz.github.io/tags/private-endpoints/</link>
+      <pubDate>Mon, 28 Mar 2022 23:39:13 +1300</pubDate>
+      
+      <guid>https://blacklabnz.github.io/tags/private-endpoints/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>terraform</title>
+      <link>https://blacklabnz.github.io/tags/terraform/</link>
+      <pubDate>Mon, 28 Mar 2022 23:39:13 +1300</pubDate>
+      
+      <guid>https://blacklabnz.github.io/tags/terraform/</guid>
       <description></description>
     </item>
     
