@@ -149,7 +149,7 @@ markup:
         anchorLineNos: false
         codeFences: true
         guessSyntax: true
-        lineNos: true
+        lineNos: false
         style: dracula
 
 # Used for displaying categories and tag page result
