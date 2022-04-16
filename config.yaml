@@ -142,12 +142,9 @@ menu:
 # Read: https://github.com/adityatelange/hugo-PaperMod/wiki/FAQs#using-hugos-syntax-highlighter-chroma
 pygmentsUseClasses: true
 markup:
-    goldmark:
-        renderer:
-            unsafe: true
     highlight:
         anchorLineNos: false
-        codeFences: true
+        codeFences: false
         guessSyntax: true
         lineNos: false
         style: dracula
