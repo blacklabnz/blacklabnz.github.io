@@ -140,14 +140,14 @@ menu:
         #   weight: 40
 
 # Read: https://github.com/adityatelange/hugo-PaperMod/wiki/FAQs#using-hugos-syntax-highlighter-chroma
-pygmentsUseClasses: false
-markup:
-    highlight:
-        # anchorLineNos: true
-        codeFences: true
-        guessSyntax: false
-        lineNos: false
-        style: dracula
+# pygmentsUseClasses: false
+# markup:
+#     highlight:
+#         # anchorLineNos: true
+#         codeFences: true
+#         guessSyntax: false
+#         lineNos: false
+#         style: dracula
 
 # Used for displaying categories and tag page result
 taxonomies:
