@@ -47,7 +47,7 @@ For your convenience, you can download tf module required for this lab from my g
 First thing before carry on to the next part is to setup the providers. 
 
 providers.tf
-```tf
+```
 terraform {
   required_providers {
     azurerm = {
