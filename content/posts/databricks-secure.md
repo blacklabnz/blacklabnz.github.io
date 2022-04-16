@@ -580,7 +580,7 @@ If you haven't installed Az cli following [this](https://docs.microsoft.com/en-u
 ## Part 6 Run notebook to validate
 Let put some python code in and test the connectivity and DNS resolutions.
 The first and most important task is to validate the connectivity and DNS resolution. You can run this code snippet in a notebook to check them.
-```
+```python
 import socket
 stor = socket.gethostbyname_ex("blkstor.dfs.core.windows.net")
 print ("\n\nThe IP Address of the Domain Name is: " + repr(stor))
@@ -592,7 +592,7 @@ If all setup correctly you should be able to see that the DNS name is resolved w
 
 If you are interest in further testing to read some file from ADLS you could use the following snippet to do so.
 
-```
+```python
 dbutils.widgets.text("adls_name",  "blkstor", "adls_name")
 dbutils.widgets.text("adls_container",  "land", "adls_container")
 # COMMAND ----------

@@ -144,7 +144,7 @@ pygmentsUseClasses: false
 markup:
     highlight:
         anchorLineNos: false
-        codeFences: true
+        codeFences: false
         guessSyntax: true
         lineNos: false
         style: dracula
