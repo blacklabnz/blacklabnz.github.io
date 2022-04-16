@@ -22,39 +22,39 @@ For the storage account private endpoint, well, we could have deployed that into
 </span></span><span class=line><span class=cl>├── variables.tf
 </span></span><span class=line><span class=cl>└── .gitignore
 </span></span></code></pre></div><p>For simplifying our demo, we are going to put all our terraform resources in the main.tf file. In real world development, the best practice would be modularize any components that are reusable.
-We are also simplifying the terraform variables with locals, you will find the only the authentication related values are kept in variables and passed in with values.tfvars file.</p><p>For your convenience, you can download tf module required for this lab from my github repo: <a href=https://github.com/blacklabnz/secure-databricks-terraform>secure-databricks-terraform</a></p><p>First thing before carry on to the next part is to setup the providers.</p><p>providers.tf</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-tf data-lang=tf><span class=line><span class=cl><span class=nx>terraform</span> <span class=p>{</span>
-</span></span><span class=line><span class=cl>  <span class=nx>required_providers</span> <span class=p>{</span>
-</span></span><span class=line><span class=cl>    <span class=na>azurerm</span> = <span class=p>{</span>
-</span></span><span class=line><span class=cl>      <span class=na>source</span>  = <span class=s2>&#34;hashicorp/azurerm&#34;</span>
-</span></span><span class=line><span class=cl>      <span class=na>version</span> = <span class=s2>&#34;2.97.0&#34;</span>
-</span></span><span class=line><span class=cl>    <span class=p>}</span>
-</span></span><span class=line><span class=cl>    <span class=na>databricks</span> = <span class=p>{</span>
-</span></span><span class=line><span class=cl>      <span class=na>source</span>  = <span class=s2>&#34;databrickslabs/databricks&#34;</span>
-</span></span><span class=line><span class=cl>      <span class=na>version</span> = <span class=s2>&#34;0.5.1&#34;</span>
-</span></span><span class=line><span class=cl>    <span class=p>}</span>
-</span></span><span class=line><span class=cl>    <span class=na>external</span> = <span class=p>{</span>
-</span></span><span class=line><span class=cl>      <span class=na>source</span>  = <span class=s2>&#34;hashicorp/external&#34;</span>
-</span></span><span class=line><span class=cl>      <span class=na>version</span> = <span class=s2>&#34;2.2.2&#34;</span>
-</span></span><span class=line><span class=cl>    <span class=p>}</span>
-</span></span><span class=line><span class=cl>  <span class=p>}</span>
-</span></span><span class=line><span class=cl><span class=p>}</span>
-</span></span><span class=line><span class=cl><span class=kr>
-</span></span></span><span class=line><span class=cl><span class=kr>provider</span> <span class=s2>&#34;azurerm&#34;</span> <span class=p>{</span>
-</span></span><span class=line><span class=cl>  <span class=nx>features</span> <span class=p>{}</span>
-</span></span><span class=line><span class=cl>  <span class=na>subscription_id</span> = <span class=nb>var</span><span class=p>.</span><span class=nx>subscription_id</span>
-</span></span><span class=line><span class=cl>  <span class=na>client_id</span>       = <span class=nb>var</span><span class=p>.</span><span class=nx>client_id</span>
-</span></span><span class=line><span class=cl>  <span class=na>client_secret</span>   = <span class=nb>var</span><span class=p>.</span><span class=nx>client_secret</span>
-</span></span><span class=line><span class=cl>  <span class=na>tenant_id</span>       = <span class=nb>var</span><span class=p>.</span><span class=nx>tenant_id</span>
-</span></span><span class=line><span class=cl><span class=p>}</span>
-</span></span><span class=line><span class=cl><span class=kr>
-</span></span></span><span class=line><span class=cl><span class=kr>provider</span> <span class=s2>&#34;databricks&#34;</span> <span class=p>{</span>
-</span></span><span class=line><span class=cl>  <span class=na>host</span>                        = <span class=nb>format</span><span class=p>(</span><span class=s2>&#34;https://%s&#34;</span><span class=p>,</span> <span class=nb>data</span><span class=p>.</span><span class=nx>azurerm_databricks_workspace</span><span class=p>.</span><span class=nx>dbr</span><span class=p>.</span><span class=nx>workspace_url</span><span class=p>)</span>
-</span></span><span class=line><span class=cl>  <span class=na>azure_workspace_resource_id</span> = <span class=nb>data</span><span class=p>.</span><span class=nx>azurerm_databricks_workspace</span><span class=p>.</span><span class=nx>dbr</span><span class=p>.</span><span class=nx>id</span>
-</span></span><span class=line><span class=cl>  <span class=na>azure_client_id</span>             = <span class=nb>var</span><span class=p>.</span><span class=nx>client_id</span>
-</span></span><span class=line><span class=cl>  <span class=na>azure_client_secret</span>         = <span class=nb>var</span><span class=p>.</span><span class=nx>client_secret</span>
-</span></span><span class=line><span class=cl>  <span class=na>azure_tenant_id</span>             = <span class=nb>var</span><span class=p>.</span><span class=nx>tenant_id</span>
-</span></span><span class=line><span class=cl><span class=p>}</span>
-</span></span></code></pre></div><h3 id=quick-explanation>Quick explanation:<a hidden class=anchor aria-hidden=true href=#quick-explanation>#</a></h3><p>line 16 to line 19 we use service principal to authenticate to azure, in here we use variables to represent the value so that later on we can specify the values.tfvars file and pass the value in. This is really handy if you need to deal with multiple Azure environment that has different auth service principals. Refer the official doc <a href=https://www.terraform.io/language/values/variables>here</a>.</p><p>To be able to use variables we will need to add the following to the variables file:</p><p>variable.tf</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-tf data-lang=tf><span class=line><span class=cl><span class=kr>variable</span> <span class=s2>&#34;subscription_id&#34;</span> <span class=p>{</span>
+We are also simplifying the terraform variables with locals, you will find the only the authentication related values are kept in variables and passed in with values.tfvars file.</p><p>For your convenience, you can download tf module required for this lab from my github repo: <a href=https://github.com/blacklabnz/secure-databricks-terraform>secure-databricks-terraform</a></p><p>First thing before carry on to the next part is to setup the providers.</p><p>providers.tf</p><pre tabindex=0><code>terraform {
+  required_providers {
+    azurerm = {
+      source  = &#34;hashicorp/azurerm&#34;
+      version = &#34;2.97.0&#34;
+    }
+    databricks = {
+      source  = &#34;databrickslabs/databricks&#34;
+      version = &#34;0.5.1&#34;
+    }
+    external = {
+      source  = &#34;hashicorp/external&#34;
+      version = &#34;2.2.2&#34;
+    }
+  }
+}
+
+provider &#34;azurerm&#34; {
+  features {}
+  subscription_id = var.subscription_id
+  client_id       = var.client_id
+  client_secret   = var.client_secret
+  tenant_id       = var.tenant_id
+}
+
+provider &#34;databricks&#34; {
+  host                        = format(&#34;https://%s&#34;, data.azurerm_databricks_workspace.dbr.workspace_url)
+  azure_workspace_resource_id = data.azurerm_databricks_workspace.dbr.id
+  azure_client_id             = var.client_id
+  azure_client_secret         = var.client_secret
+  azure_tenant_id             = var.tenant_id
+}
+</code></pre><h3 id=quick-explanation>Quick explanation:<a hidden class=anchor aria-hidden=true href=#quick-explanation>#</a></h3><p>line 16 to line 19 we use service principal to authenticate to azure, in here we use variables to represent the value so that later on we can specify the values.tfvars file and pass the value in. This is really handy if you need to deal with multiple Azure environment that has different auth service principals. Refer the official doc <a href=https://www.terraform.io/language/values/variables>here</a>.</p><p>To be able to use variables we will need to add the following to the variables file:</p><p>variable.tf</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-tf data-lang=tf><span class=line><span class=cl><span class=kr>variable</span> <span class=s2>&#34;subscription_id&#34;</span> <span class=p>{</span>
 </span></span><span class=line><span class=cl>  <span class=na>type</span> = <span class=nx>string</span>
 </span></span><span class=line><span class=cl>  <span class=na>default</span> = <span class=s2>&#34;default&#34;</span>
 </span></span><span class=line><span class=cl><span class=p>}</span> 
