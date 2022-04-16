@@ -13,7 +13,7 @@ For all infra related deployment I am going to use Terraform as much as possible
 In this lab we will use databricks with <a href=https://docs.microsoft.com/en-us/azure/databricks/security/secure-cluster-connectivity>secured connectivity and vNet injection</a> to access some data residing in the ADLS with <a href=https://docs.microsoft.com/en-us/azure/storage/common/storage-private-endpoints>private endpoint</a> configuration.
 We will also create keyvault for keeping the secrets involved using private endpoint.
 In the end we will use a simply python notebook to validate two things against the private Ip of the private endpoint:</p><ol><li>the network connectivity</li><li>DNS resolution</li></ol><p>As revealed on the diagram, we are simulating a well adopted hub and spoke topology. In our case we don&rsquo;t have any hub for this lab, but two spokes that connects to each other via vNet peering.
-For the storage account private endpoint, well, we could have deployed that into the databricks vNet and they would naturally have connectivity(and secured by NSG if needed). But that removes the fun of dealing with Networking and sometime there are enough reason on the design to keep the private endpoint virtual network separate from other virtual network. We will also create keyvault with private endpoint and use that for a <a href=https://docs.microsoft.com/en-us/azure/databricks/security/secrets/secret-scopes>KV backed secret scope</a> in databricks. In a nutshell a secret scope is a way to securely store secrets such as service principal key or a storage account key or any other type of secrets as such, so that we do hard code and secrets but are able to use &ldquo;dbutil&rdquo; to retrieve the secrets in a notebook run. Simple but yet important principle right ? no hard coded secret in your source code !!!!</p><h3 id=project-setup>Project setup<a hidden class=anchor aria-hidden=true href=#project-setup>#</a></h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>├── README.md
+For the storage account private endpoint, well, we could have deployed that into the databricks vNet and they would naturally have connectivity(and secured by NSG if needed). But that removes the fun of dealing with Networking and sometime there are enough reason on the design to keep the private endpoint virtual network separate from other virtual network. We will also create keyvault with private endpoint and use that for a <a href=https://docs.microsoft.com/en-us/azure/databricks/security/secrets/secret-scopes>KV backed secret scope</a> in databricks. In a nutshell a secret scope is a way to securely store secrets such as service principal key or a storage account key or any other type of secrets as such, so that we do hard code and secrets but are able to use &ldquo;dbutil&rdquo; to retrieve the secrets in a notebook run. Simple but yet important principle right ? no hard coded secret in your source code !!!!</p><h3 id=project-setup>Project setup<a hidden class=anchor aria-hidden=true href=#project-setup>#</a></h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>├── README.md
 </span></span><span style=display:flex><span>├── data.tf
 </span></span><span style=display:flex><span>├── main.tf
 </span></span><span style=display:flex><span>├── output.tf
@@ -22,188 +22,188 @@ For the storage account private endpoint, well, we could have deployed that into
 </span></span><span style=display:flex><span>├── variables.tf
 </span></span><span style=display:flex><span>└── .gitignore
 </span></span></code></pre></div><p>For simplifying our demo, we are going to put all our terraform resources in the main.tf file. In real world development, the best practice would be modularize any components that are reusable.
-We are also simplifying the terraform variables with locals, you will find the only the authentication related values are kept in variables and passed in with values.tfvars file.</p><p>For your convenience, you can download tf module required for this lab from my github repo: <a href=https://github.com/blacklabnz/secure-databricks-terraform>secure-databricks-terraform</a></p><p>First thing before carry on to the next part is to setup the providers.</p><p>providers.tf</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-tf data-lang=tf><span style=display:flex><span>terraform {
-</span></span><span style=display:flex><span>  required_providers {
-</span></span><span style=display:flex><span>    <span style=color:#50fa7b>azurerm</span> = {
-</span></span><span style=display:flex><span>      <span style=color:#50fa7b>source</span>  = <span style=color:#f1fa8c>&#34;hashicorp/azurerm&#34;</span>
-</span></span><span style=display:flex><span>      <span style=color:#50fa7b>version</span> = <span style=color:#f1fa8c>&#34;2.97.0&#34;</span>
+We are also simplifying the terraform variables with locals, you will find the only the authentication related values are kept in variables and passed in with values.tfvars file.</p><p>For your convenience, you can download tf module required for this lab from my github repo: <a href=https://github.com/blacklabnz/secure-databricks-terraform>secure-databricks-terraform</a></p><p>First thing before carry on to the next part is to setup the providers.</p><p>providers.tf</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-tf data-lang=tf><span style=display:flex><span><span style=color:#a6e22e>terraform</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>required_providers</span> {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>azurerm</span> = {
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>source</span>  = <span style=color:#e6db74>&#34;hashicorp/azurerm&#34;</span>
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>version</span> = <span style=color:#e6db74>&#34;2.97.0&#34;</span>
 </span></span><span style=display:flex><span>    }
-</span></span><span style=display:flex><span>    <span style=color:#50fa7b>databricks</span> = {
-</span></span><span style=display:flex><span>      <span style=color:#50fa7b>source</span>  = <span style=color:#f1fa8c>&#34;databrickslabs/databricks&#34;</span>
-</span></span><span style=display:flex><span>      <span style=color:#50fa7b>version</span> = <span style=color:#f1fa8c>&#34;0.5.1&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>databricks</span> = {
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>source</span>  = <span style=color:#e6db74>&#34;databrickslabs/databricks&#34;</span>
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>version</span> = <span style=color:#e6db74>&#34;0.5.1&#34;</span>
 </span></span><span style=display:flex><span>    }
-</span></span><span style=display:flex><span>    <span style=color:#50fa7b>external</span> = {
-</span></span><span style=display:flex><span>      <span style=color:#50fa7b>source</span>  = <span style=color:#f1fa8c>&#34;hashicorp/external&#34;</span>
-</span></span><span style=display:flex><span>      <span style=color:#50fa7b>version</span> = <span style=color:#f1fa8c>&#34;2.2.2&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>external</span> = {
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>source</span>  = <span style=color:#e6db74>&#34;hashicorp/external&#34;</span>
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>version</span> = <span style=color:#e6db74>&#34;2.2.2&#34;</span>
 </span></span><span style=display:flex><span>    }
 </span></span><span style=display:flex><span>  }
 </span></span><span style=display:flex><span>}
-</span></span><span style=display:flex><span><span style=color:#ff79c6>
-</span></span></span><span style=display:flex><span><span style=color:#ff79c6>provider</span> <span style=color:#f1fa8c>&#34;azurerm&#34;</span> {
-</span></span><span style=display:flex><span>  features {}
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>subscription_id</span> = <span style=color:#8be9fd;font-style:italic>var</span>.subscription_id
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>client_id</span>       = <span style=color:#8be9fd;font-style:italic>var</span>.client_id
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>client_secret</span>   = <span style=color:#8be9fd;font-style:italic>var</span>.client_secret
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>tenant_id</span>       = <span style=color:#8be9fd;font-style:italic>var</span>.tenant_id
+</span></span><span style=display:flex><span><span style=color:#66d9ef>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>provider</span> <span style=color:#e6db74>&#34;azurerm&#34;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>features</span> {}
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>subscription_id</span> = var.<span style=color:#a6e22e>subscription_id</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>client_id</span>       = var.<span style=color:#a6e22e>client_id</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>client_secret</span>   = var.<span style=color:#a6e22e>client_secret</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>tenant_id</span>       = var.<span style=color:#a6e22e>tenant_id</span>
 </span></span><span style=display:flex><span>}
-</span></span><span style=display:flex><span><span style=color:#ff79c6>
-</span></span></span><span style=display:flex><span><span style=color:#ff79c6>provider</span> <span style=color:#f1fa8c>&#34;databricks&#34;</span> {
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>host</span>                        = <span style=color:#8be9fd;font-style:italic>format</span>(<span style=color:#f1fa8c>&#34;https://%s&#34;</span>, <span style=color:#8be9fd;font-style:italic>data</span>.azurerm_databricks_workspace.dbr.workspace_url)
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>azure_workspace_resource_id</span> = <span style=color:#8be9fd;font-style:italic>data</span>.azurerm_databricks_workspace.dbr.id
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>azure_client_id</span>             = <span style=color:#8be9fd;font-style:italic>var</span>.client_id
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>azure_client_secret</span>         = <span style=color:#8be9fd;font-style:italic>var</span>.client_secret
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>azure_tenant_id</span>             = <span style=color:#8be9fd;font-style:italic>var</span>.tenant_id
+</span></span><span style=display:flex><span><span style=color:#66d9ef>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>provider</span> <span style=color:#e6db74>&#34;databricks&#34;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>host</span>                        = format(<span style=color:#e6db74>&#34;https://%s&#34;</span>, data.<span style=color:#a6e22e>azurerm_databricks_workspace</span>.<span style=color:#a6e22e>dbr</span>.<span style=color:#a6e22e>workspace_url</span>)
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>azure_workspace_resource_id</span> = data.<span style=color:#a6e22e>azurerm_databricks_workspace</span>.<span style=color:#a6e22e>dbr</span>.<span style=color:#a6e22e>id</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>azure_client_id</span>             = var.<span style=color:#a6e22e>client_id</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>azure_client_secret</span>         = var.<span style=color:#a6e22e>client_secret</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>azure_tenant_id</span>             = var.<span style=color:#a6e22e>tenant_id</span>
 </span></span><span style=display:flex><span>}
-</span></span></code></pre></div><h3 id=quick-explanation>Quick explanation:<a hidden class=anchor aria-hidden=true href=#quick-explanation>#</a></h3><p>line 16 to line 19 we use service principal to authenticate to azure, in here we use variables to represent the value so that later on we can specify the values.tfvars file and pass the value in. This is really handy if you need to deal with multiple Azure environment that has different auth service principals. Refer the official doc <a href=https://www.terraform.io/language/values/variables>here</a>.</p><p>To be able to use variables we will need to add the following to the variables file:</p><p>variable.tf</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-tf data-lang=tf><span style=display:flex><span><span style=color:#ff79c6>variable</span> <span style=color:#f1fa8c>&#34;subscription_id&#34;</span> {
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>type</span> = string
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>default</span> = <span style=color:#f1fa8c>&#34;default&#34;</span>
+</span></span></code></pre></div><h3 id=quick-explanation>Quick explanation:<a hidden class=anchor aria-hidden=true href=#quick-explanation>#</a></h3><p>line 16 to line 19 we use service principal to authenticate to azure, in here we use variables to represent the value so that later on we can specify the values.tfvars file and pass the value in. This is really handy if you need to deal with multiple Azure environment that has different auth service principals. Refer the official doc <a href=https://www.terraform.io/language/values/variables>here</a>.</p><p>To be able to use variables we will need to add the following to the variables file:</p><p>variable.tf</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-tf data-lang=tf><span style=display:flex><span><span style=color:#66d9ef>variable</span> <span style=color:#e6db74>&#34;subscription_id&#34;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>type</span> = <span style=color:#a6e22e>string</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>default</span> = <span style=color:#e6db74>&#34;default&#34;</span>
 </span></span><span style=display:flex><span>} 
-</span></span><span style=display:flex><span><span style=color:#ff79c6>variable</span> <span style=color:#f1fa8c>&#34;client_id&#34;</span> {
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>type</span> = string
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>default</span> = <span style=color:#f1fa8c>&#34;default&#34;</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>variable</span> <span style=color:#e6db74>&#34;client_id&#34;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>type</span> = <span style=color:#a6e22e>string</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>default</span> = <span style=color:#e6db74>&#34;default&#34;</span>
 </span></span><span style=display:flex><span>}
-</span></span><span style=display:flex><span><span style=color:#ff79c6>variable</span> <span style=color:#f1fa8c>&#34;client_secret&#34;</span> {
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>type</span> = string
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>default</span> = <span style=color:#f1fa8c>&#34;default&#34;</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>variable</span> <span style=color:#e6db74>&#34;client_secret&#34;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>type</span> = <span style=color:#a6e22e>string</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>default</span> = <span style=color:#e6db74>&#34;default&#34;</span>
 </span></span><span style=display:flex><span>}   
-</span></span><span style=display:flex><span><span style=color:#ff79c6>variable</span> <span style=color:#f1fa8c>&#34;tenant_id&#34;</span> {
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>type</span> = string
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>default</span> = <span style=color:#f1fa8c>&#34;default&#34;</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>variable</span> <span style=color:#e6db74>&#34;tenant_id&#34;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>type</span> = <span style=color:#a6e22e>string</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>default</span> = <span style=color:#e6db74>&#34;default&#34;</span>
 </span></span><span style=display:flex><span>}       
-</span></span></code></pre></div><p>line 23 to 27 similar deal here. One thing to note is that we are retrieving the databricks workspace url and resource id by using tf data object. The following needs to be added in the data.tf to achieve this.</p><p>data.tf</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-tf data-lang=tf><span style=display:flex><span><span style=color:#ff79c6>data</span> <span style=color:#f1fa8c>&#34;azurerm_databricks_workspace&#34;</span> <span style=color:#f1fa8c>&#34;dbr&#34;</span> {
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>name</span>                = azurerm_databricks_workspace.dbr.name
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>resource_group_name</span> = local.rg
+</span></span></code></pre></div><p>line 23 to 27 similar deal here. One thing to note is that we are retrieving the databricks workspace url and resource id by using tf data object. The following needs to be added in the data.tf to achieve this.</p><p>data.tf</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-tf data-lang=tf><span style=display:flex><span><span style=color:#66d9ef>data</span> <span style=color:#e6db74>&#34;azurerm_databricks_workspace&#34;</span> <span style=color:#e6db74>&#34;dbr&#34;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>name</span>                = <span style=color:#a6e22e>azurerm_databricks_workspace</span>.<span style=color:#a6e22e>dbr</span>.<span style=color:#a6e22e>name</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>resource_group_name</span> = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>rg</span>
 </span></span><span style=display:flex><span>}
 </span></span></code></pre></div><p>Lastly you will need to create a service principal that has contributor access to the subscription that you are about to deploy to. You can find more details in this office <a href=https://docs.microsoft.com/en-us/cli/azure/create-an-azure-service-principal-azure-cli>doc</a>.
 Once Service principal is created you will need to create a secret and use that alone side with the application id to authentication to Azure. When finished, please create a values.tfvars file where you could input those required auth information for terraform to pass in as variables. The information required are:</p><ol><li>subscription id</li><li>service principal client id</li><li>service principal client secret</li><li>azure tenant id.</li></ol><p>values.tfvars</p><pre tabindex=0><code>subscription_id = &#34;xxxxxxxxx&#34;
 client_id       = &#34;xxxxxxxxx&#34;
 client_secret   = &#34;xxxxxxxxx&#34;
 tenant_id       = &#34;xxxxxxxxx&#34;
-</code></pre><p>At this point we will need to initiate our terraform workspace by running:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>terraform init
-</span></span></code></pre></div><p>With that all set, lets move on to next part of creating actual resources.</p><h2 id=part-2-virtual-networks-and-peering>Part 2 Virtual networks and peering<a hidden class=anchor aria-hidden=true href=#part-2-virtual-networks-and-peering>#</a></h2><p>First we will add some variables to main.tf that we can use in the main file to the locals block</p><p>main.tf</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-tf data-lang=tf><span style=display:flex><span>locals {
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>org</span>           = <span style=color:#f1fa8c>&#34;blk&#34;</span>
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>rg</span>            = <span style=color:#f1fa8c>&#34;</span><span style=color:#f1fa8c>${</span>local.org<span style=color:#f1fa8c>}</span><span style=color:#f1fa8c>-secure-dbr&#34;</span>
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>rg_location</span>   = <span style=color:#f1fa8c>&#34;australiaeast&#34;</span>
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>vnet_dbr</span>      = <span style=color:#f1fa8c>&#34;</span><span style=color:#f1fa8c>${</span>local.org<span style=color:#f1fa8c>}</span><span style=color:#f1fa8c>-spoke-dbr&#34;</span>
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>vnet_resource</span> = <span style=color:#f1fa8c>&#34;</span><span style=color:#f1fa8c>${</span>local.org<span style=color:#f1fa8c>}</span><span style=color:#f1fa8c>-spoke-resource&#34;</span>
+</code></pre><p>At this point we will need to initiate our terraform workspace by running:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>terraform init
+</span></span></code></pre></div><p>With that all set, lets move on to next part of creating actual resources.</p><h2 id=part-2-virtual-networks-and-peering>Part 2 Virtual networks and peering<a hidden class=anchor aria-hidden=true href=#part-2-virtual-networks-and-peering>#</a></h2><p>First we will add some variables to main.tf that we can use in the main file to the locals block</p><p>main.tf</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-tf data-lang=tf><span style=display:flex><span><span style=color:#a6e22e>locals</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>org</span>           = <span style=color:#e6db74>&#34;blk&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>rg</span>            = <span style=color:#e6db74>&#34;</span><span style=color:#e6db74>${</span><span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>org</span><span style=color:#e6db74>}</span><span style=color:#e6db74>-secure-dbr&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>rg_location</span>   = <span style=color:#e6db74>&#34;australiaeast&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>vnet_dbr</span>      = <span style=color:#e6db74>&#34;</span><span style=color:#e6db74>${</span><span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>org</span><span style=color:#e6db74>}</span><span style=color:#e6db74>-spoke-dbr&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>vnet_resource</span> = <span style=color:#e6db74>&#34;</span><span style=color:#e6db74>${</span><span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>org</span><span style=color:#e6db74>}</span><span style=color:#e6db74>-spoke-resource&#34;</span>
 </span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>vnet_dbr_address_space</span> = <span style=color:#f1fa8c>&#34;10.0.0.0/16&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>vnet_dbr_address_space</span> = <span style=color:#e6db74>&#34;10.0.0.0/16&#34;</span>
 </span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>vnet_dbr_subnet_prv</span>        = <span style=color:#f1fa8c>&#34;private&#34;</span>
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>vnet_dbr_subnet_prv_prefix</span> = <span style=color:#f1fa8c>&#34;10.0.1.0/24&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>vnet_dbr_subnet_prv</span>        = <span style=color:#e6db74>&#34;private&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>vnet_dbr_subnet_prv_prefix</span> = <span style=color:#e6db74>&#34;10.0.1.0/24&#34;</span>
 </span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>vnet_dbr_subnet_pub</span>        = <span style=color:#f1fa8c>&#34;public&#34;</span>
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>vnet_dbr_subnet_pub_prefix</span> = <span style=color:#f1fa8c>&#34;10.0.2.0/24&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>vnet_dbr_subnet_pub</span>        = <span style=color:#e6db74>&#34;public&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>vnet_dbr_subnet_pub_prefix</span> = <span style=color:#e6db74>&#34;10.0.2.0/24&#34;</span>
 </span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>vnet_resource_address_space</span> = <span style=color:#f1fa8c>&#34;10.1.0.0/16&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>vnet_resource_address_space</span> = <span style=color:#e6db74>&#34;10.1.0.0/16&#34;</span>
 </span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>vnet_resource_subnet_stor</span>        = <span style=color:#f1fa8c>&#34;stor&#34;</span>
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>vnet_resource_subnet_stor_prefix</span> = <span style=color:#f1fa8c>&#34;10.1.1.0/24&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>vnet_resource_subnet_stor</span>        = <span style=color:#e6db74>&#34;stor&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>vnet_resource_subnet_stor_prefix</span> = <span style=color:#e6db74>&#34;10.1.1.0/24&#34;</span>
 </span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>vnet_resource_subnet_kv</span>        = <span style=color:#f1fa8c>&#34;keyvault&#34;</span>
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>vnet_resource_subnet_kv_prefix</span> = <span style=color:#f1fa8c>&#34;10.1.2.0/24&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>vnet_resource_subnet_kv</span>        = <span style=color:#e6db74>&#34;keyvault&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>vnet_resource_subnet_kv_prefix</span> = <span style=color:#e6db74>&#34;10.1.2.0/24&#34;</span>
 </span></span><span style=display:flex><span>}
 </span></span></code></pre></div><p>Line 2 to line 6 defines some local variables that we can reuse to build up the name of vNets.
 Line 8 to 14 defines the databricks vNet.
-Line 16 to 22 defines the resource vNet which is used by storage account and keyvault.</p><h3 id=21-spoke-vnet-for-databricks>2.1 Spoke vNet for databricks<a hidden class=anchor aria-hidden=true href=#21-spoke-vnet-for-databricks>#</a></h3><p>Pretty standard configuration here, one thing to note is that the subnets name is dictated to be private and public. There are also requirements to the minimum size of the subnets, please refere to this <a href="https://docs.microsoft.com/en-us/azure/databricks/administration-guide/cloud-configurations/azure/vnet-inject#:~:text=Region%3A%20The%20VNet%20must%20reside,subnet%20and%20a%20host%20subnet.">doc</a> for more details.</p><p>All we need to do is to add the following to main.tf next to the locals block.</p><p>main.tf</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-tf data-lang=tf><span style=display:flex><span><span style=color:#ff79c6>resource</span> <span style=color:#f1fa8c>&#34;azurerm_resource_group&#34;</span> <span style=color:#f1fa8c>&#34;secure_dbr&#34;</span> {
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>name</span>     = local.rg
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>location</span> = local.rg_location
+Line 16 to 22 defines the resource vNet which is used by storage account and keyvault.</p><h3 id=21-spoke-vnet-for-databricks>2.1 Spoke vNet for databricks<a hidden class=anchor aria-hidden=true href=#21-spoke-vnet-for-databricks>#</a></h3><p>Pretty standard configuration here, one thing to note is that the subnets name is dictated to be private and public. There are also requirements to the minimum size of the subnets, please refere to this <a href="https://docs.microsoft.com/en-us/azure/databricks/administration-guide/cloud-configurations/azure/vnet-inject#:~:text=Region%3A%20The%20VNet%20must%20reside,subnet%20and%20a%20host%20subnet.">doc</a> for more details.</p><p>All we need to do is to add the following to main.tf next to the locals block.</p><p>main.tf</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-tf data-lang=tf><span style=display:flex><span><span style=color:#66d9ef>resource</span> <span style=color:#e6db74>&#34;azurerm_resource_group&#34;</span> <span style=color:#e6db74>&#34;secure_dbr&#34;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>name</span>     = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>rg</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>location</span> = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>rg_location</span>
 </span></span><span style=display:flex><span>}
-</span></span><span style=display:flex><span><span style=color:#ff79c6>
-</span></span></span><span style=display:flex><span><span style=color:#ff79c6>resource</span> <span style=color:#f1fa8c>&#34;azurerm_virtual_network&#34;</span> <span style=color:#f1fa8c>&#34;vnet_dbr&#34;</span> {
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>name</span>                = local.vnet_dbr
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>location</span>            = local.rg_location
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>resource_group_name</span> = azurerm_resource_group.secure_dbr.name
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>address_space</span>       = [local.vnet_dbr_address_space]
+</span></span><span style=display:flex><span><span style=color:#66d9ef>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>resource</span> <span style=color:#e6db74>&#34;azurerm_virtual_network&#34;</span> <span style=color:#e6db74>&#34;vnet_dbr&#34;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>name</span>                = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>vnet_dbr</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>location</span>            = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>rg_location</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>resource_group_name</span> = <span style=color:#a6e22e>azurerm_resource_group</span>.<span style=color:#a6e22e>secure_dbr</span>.<span style=color:#a6e22e>name</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>address_space</span>       = [<span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>vnet_dbr_address_space</span>]
 </span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>depends_on</span> = [azurerm_resource_group.secure_dbr]
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>depends_on</span> = [<span style=color:#a6e22e>azurerm_resource_group</span>.<span style=color:#a6e22e>secure_dbr</span>]
 </span></span><span style=display:flex><span>}
-</span></span><span style=display:flex><span><span style=color:#ff79c6>
-</span></span></span><span style=display:flex><span><span style=color:#ff79c6>resource</span> <span style=color:#f1fa8c>&#34;azurerm_subnet&#34;</span> <span style=color:#f1fa8c>&#34;dbr_prv&#34;</span> {
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>name</span>                 = local.vnet_dbr_subnet_prv
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>resource_group_name</span>  = local.rg
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>virtual_network_name</span> = azurerm_virtual_network.vnet_dbr.name
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>address_prefixes</span>     = [local.vnet_dbr_subnet_prv_prefix]
+</span></span><span style=display:flex><span><span style=color:#66d9ef>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>resource</span> <span style=color:#e6db74>&#34;azurerm_subnet&#34;</span> <span style=color:#e6db74>&#34;dbr_prv&#34;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>name</span>                 = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>vnet_dbr_subnet_prv</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>resource_group_name</span>  = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>rg</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>virtual_network_name</span> = <span style=color:#a6e22e>azurerm_virtual_network</span>.<span style=color:#a6e22e>vnet_dbr</span>.<span style=color:#a6e22e>name</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>address_prefixes</span>     = [<span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>vnet_dbr_subnet_prv_prefix</span>]
 </span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>  delegation {
-</span></span><span style=display:flex><span>    <span style=color:#50fa7b>name</span> = <span style=color:#f1fa8c>&#34;dbr_prv_dlg&#34;</span>
-</span></span><span style=display:flex><span>    service_delegation {
-</span></span><span style=display:flex><span>      <span style=color:#50fa7b>name</span> = <span style=color:#f1fa8c>&#34;Microsoft.Databricks/workspaces&#34;</span>
-</span></span><span style=display:flex><span>      <span style=color:#50fa7b>actions</span> = [
-</span></span><span style=display:flex><span>        <span style=color:#f1fa8c>&#34;Microsoft.Network/virtualNetworks/subnets/join/action&#34;</span>,
-</span></span><span style=display:flex><span>        <span style=color:#f1fa8c>&#34;Microsoft.Network/virtualNetworks/subnets/prepareNetworkPolicies/action&#34;</span>,
-</span></span><span style=display:flex><span>        <span style=color:#f1fa8c>&#34;Microsoft.Network/virtualNetworks/subnets/unprepareNetworkPolicies/action&#34;</span>,
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>delegation</span> {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>name</span> = <span style=color:#e6db74>&#34;dbr_prv_dlg&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>service_delegation</span> {
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>name</span> = <span style=color:#e6db74>&#34;Microsoft.Databricks/workspaces&#34;</span>
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>actions</span> = [
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;Microsoft.Network/virtualNetworks/subnets/join/action&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;Microsoft.Network/virtualNetworks/subnets/prepareNetworkPolicies/action&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;Microsoft.Network/virtualNetworks/subnets/unprepareNetworkPolicies/action&#34;</span>,
 </span></span><span style=display:flex><span>      ]
 </span></span><span style=display:flex><span>    }
 </span></span><span style=display:flex><span>  }
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>depends_on</span> = [azurerm_virtual_network.vnet_dbr]
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>depends_on</span> = [<span style=color:#a6e22e>azurerm_virtual_network</span>.<span style=color:#a6e22e>vnet_dbr</span>]
 </span></span><span style=display:flex><span>}
-</span></span><span style=display:flex><span><span style=color:#ff79c6>
-</span></span></span><span style=display:flex><span><span style=color:#ff79c6>resource</span> <span style=color:#f1fa8c>&#34;azurerm_subnet&#34;</span> <span style=color:#f1fa8c>&#34;dbr_pub&#34;</span> {
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>name</span>                 = local.vnet_dbr_subnet_pub
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>resource_group_name</span>  = local.rg
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>virtual_network_name</span> = azurerm_virtual_network.vnet_dbr.name
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>address_prefixes</span>     = [local.vnet_dbr_subnet_pub_prefix]
+</span></span><span style=display:flex><span><span style=color:#66d9ef>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>resource</span> <span style=color:#e6db74>&#34;azurerm_subnet&#34;</span> <span style=color:#e6db74>&#34;dbr_pub&#34;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>name</span>                 = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>vnet_dbr_subnet_pub</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>resource_group_name</span>  = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>rg</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>virtual_network_name</span> = <span style=color:#a6e22e>azurerm_virtual_network</span>.<span style=color:#a6e22e>vnet_dbr</span>.<span style=color:#a6e22e>name</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>address_prefixes</span>     = [<span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>vnet_dbr_subnet_pub_prefix</span>]
 </span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>  delegation {
-</span></span><span style=display:flex><span>    <span style=color:#50fa7b>name</span> = <span style=color:#f1fa8c>&#34;dbr_pub_dlg&#34;</span>
-</span></span><span style=display:flex><span>    service_delegation {
-</span></span><span style=display:flex><span>      <span style=color:#50fa7b>name</span> = <span style=color:#f1fa8c>&#34;Microsoft.Databricks/workspaces&#34;</span>
-</span></span><span style=display:flex><span>      <span style=color:#50fa7b>actions</span> = [
-</span></span><span style=display:flex><span>        <span style=color:#f1fa8c>&#34;Microsoft.Network/virtualNetworks/subnets/join/action&#34;</span>,
-</span></span><span style=display:flex><span>        <span style=color:#f1fa8c>&#34;Microsoft.Network/virtualNetworks/subnets/prepareNetworkPolicies/action&#34;</span>,
-</span></span><span style=display:flex><span>        <span style=color:#f1fa8c>&#34;Microsoft.Network/virtualNetworks/subnets/unprepareNetworkPolicies/action&#34;</span>,
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>delegation</span> {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>name</span> = <span style=color:#e6db74>&#34;dbr_pub_dlg&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>service_delegation</span> {
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>name</span> = <span style=color:#e6db74>&#34;Microsoft.Databricks/workspaces&#34;</span>
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>actions</span> = [
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;Microsoft.Network/virtualNetworks/subnets/join/action&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;Microsoft.Network/virtualNetworks/subnets/prepareNetworkPolicies/action&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;Microsoft.Network/virtualNetworks/subnets/unprepareNetworkPolicies/action&#34;</span>,
 </span></span><span style=display:flex><span>      ]
 </span></span><span style=display:flex><span>    }
 </span></span><span style=display:flex><span>  }
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>depends_on</span> = [azurerm_virtual_network.vnet_dbr]
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>depends_on</span> = [<span style=color:#a6e22e>azurerm_virtual_network</span>.<span style=color:#a6e22e>vnet_dbr</span>]
 </span></span><span style=display:flex><span>}
 </span></span></code></pre></div><h3 id=quick-explanation-1>Quick explanation:<a hidden class=anchor aria-hidden=true href=#quick-explanation-1>#</a></h3><p>Line 1-4 defines the resource group.
 Line 6-13 defines the dbr vNet.
 Line 15-53 defines the private and public subnets for the clusters.<div class=Note style=background-color:var(--note);font-size:15px;margin-bottom:10px;margin-top:10px;padding:10px;border-radius:10px><i class="fas fa-exclamation-triangle"></i>
-Note in each of the subnet there is subnet delegation properties that needs to be added. The delegation block is not mandatory as Azure will take care of that, but if you don't add that, next time when you do terraform plan, the delegation property will be recognized as change even though there is nothing changed.</div></p><h3 id=22-spoke-vnet-for-storage-account-and-keyvault>2.2 Spoke vNet for storage account and keyvault<a hidden class=anchor aria-hidden=true href=#22-spoke-vnet-for-storage-account-and-keyvault>#</a></h3><p>Nothing complicated here, just need a separate subnets for storage account and keyvault private endpoints. Add the following to main.tf file.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-tf data-lang=tf><span style=display:flex><span><span style=color:#ff79c6>resource</span> <span style=color:#f1fa8c>&#34;azurerm_virtual_network&#34;</span> <span style=color:#f1fa8c>&#34;vnet_resource&#34;</span> {
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>name</span>                = local.vnet_resource
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>location</span>            = local.rg_location
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>resource_group_name</span> = azurerm_resource_group.secure_dbr.name
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>address_space</span>       = [local.vnet_resource_address_space]
+Note in each of the subnet there is subnet delegation properties that needs to be added. The delegation block is not mandatory as Azure will take care of that, but if you don't add that, next time when you do terraform plan, the delegation property will be recognized as change even though there is nothing changed.</div></p><h3 id=22-spoke-vnet-for-storage-account-and-keyvault>2.2 Spoke vNet for storage account and keyvault<a hidden class=anchor aria-hidden=true href=#22-spoke-vnet-for-storage-account-and-keyvault>#</a></h3><p>Nothing complicated here, just need a separate subnets for storage account and keyvault private endpoints. Add the following to main.tf file.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-tf data-lang=tf><span style=display:flex><span><span style=color:#66d9ef>resource</span> <span style=color:#e6db74>&#34;azurerm_virtual_network&#34;</span> <span style=color:#e6db74>&#34;vnet_resource&#34;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>name</span>                = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>vnet_resource</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>location</span>            = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>rg_location</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>resource_group_name</span> = <span style=color:#a6e22e>azurerm_resource_group</span>.<span style=color:#a6e22e>secure_dbr</span>.<span style=color:#a6e22e>name</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>address_space</span>       = [<span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>vnet_resource_address_space</span>]
 </span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>depends_on</span> = [azurerm_resource_group.secure_dbr]
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>depends_on</span> = [<span style=color:#a6e22e>azurerm_resource_group</span>.<span style=color:#a6e22e>secure_dbr</span>]
 </span></span><span style=display:flex><span>}
-</span></span><span style=display:flex><span><span style=color:#ff79c6>
-</span></span></span><span style=display:flex><span><span style=color:#ff79c6>resource</span> <span style=color:#f1fa8c>&#34;azurerm_subnet&#34;</span> <span style=color:#f1fa8c>&#34;resource_stor&#34;</span> {
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>name</span>                                           = local.vnet_resource_subnet_stor
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>resource_group_name</span>                            = local.rg
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>virtual_network_name</span>                           = azurerm_virtual_network.vnet_resource.name
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>address_prefixes</span>                               = [local.vnet_resource_subnet_stor_prefix]
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>enforce_private_link_endpoint_network_policies</span> = <span style=color:#ff79c6>true</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>resource</span> <span style=color:#e6db74>&#34;azurerm_subnet&#34;</span> <span style=color:#e6db74>&#34;resource_stor&#34;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>name</span>                                           = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>vnet_resource_subnet_stor</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>resource_group_name</span>                            = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>rg</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>virtual_network_name</span>                           = <span style=color:#a6e22e>azurerm_virtual_network</span>.<span style=color:#a6e22e>vnet_resource</span>.<span style=color:#a6e22e>name</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>address_prefixes</span>                               = [<span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>vnet_resource_subnet_stor_prefix</span>]
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>enforce_private_link_endpoint_network_policies</span> = <span style=color:#66d9ef>true</span>
 </span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>depends_on</span> = [azurerm_virtual_network.vnet_resource]
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>depends_on</span> = [<span style=color:#a6e22e>azurerm_virtual_network</span>.<span style=color:#a6e22e>vnet_resource</span>]
 </span></span><span style=display:flex><span>}
-</span></span><span style=display:flex><span><span style=color:#ff79c6>
-</span></span></span><span style=display:flex><span><span style=color:#ff79c6>resource</span> <span style=color:#f1fa8c>&#34;azurerm_subnet&#34;</span> <span style=color:#f1fa8c>&#34;resource_kv&#34;</span> {
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>name</span>                                           = local.vnet_resource_subnet_kv
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>resource_group_name</span>                            = local.rg
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>virtual_network_name</span>                           = azurerm_virtual_network.vnet_resource.name
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>address_prefixes</span>                               = [local.vnet_resource_subnet_kv_prefix]
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>enforce_private_link_endpoint_network_policies</span> = <span style=color:#ff79c6>true</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>resource</span> <span style=color:#e6db74>&#34;azurerm_subnet&#34;</span> <span style=color:#e6db74>&#34;resource_kv&#34;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>name</span>                                           = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>vnet_resource_subnet_kv</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>resource_group_name</span>                            = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>rg</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>virtual_network_name</span>                           = <span style=color:#a6e22e>azurerm_virtual_network</span>.<span style=color:#a6e22e>vnet_resource</span>.<span style=color:#a6e22e>name</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>address_prefixes</span>                               = [<span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>vnet_resource_subnet_kv_prefix</span>]
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>enforce_private_link_endpoint_network_policies</span> = <span style=color:#66d9ef>true</span>
 </span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>depends_on</span> = [azurerm_virtual_network.vnet_resource]
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>depends_on</span> = [<span style=color:#a6e22e>azurerm_virtual_network</span>.<span style=color:#a6e22e>vnet_resource</span>]
 </span></span><span style=display:flex><span>}
-</span></span></code></pre></div><h3 id=quick-explanation-2>Quick explanation<a hidden class=anchor aria-hidden=true href=#quick-explanation-2>#</a></h3><p>Note the difference on the subnet compare to the above. Subnets provisioned for storage account and keyvault does not require subnet delegation. However it need the &ldquo;Private endpoint network policy&rdquo; to be enabled before any private endpoint can be deployed in it.</p><h3 id=23-vnet-peering>2.3 vNet peering<a hidden class=anchor aria-hidden=true href=#23-vnet-peering>#</a></h3><p>Virtual network peering ensures the connectivity between two virtual networks. In some environments direct spoke to spoke communication via peering is disable, all traffic between vNet peers goes via hub network, filtered and processed by firewall. However purpose of our lab is to focus on Databricks and private endpoints, we will use peering, a simpler setup to achieve spoke to spoke connectivity. I will write a separate article to talk about best practice of Hub-Spoke topology.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-tf data-lang=tf><span style=display:flex><span><span style=color:#ff79c6>resource</span> <span style=color:#f1fa8c>&#34;azurerm_virtual_network_peering&#34;</span> <span style=color:#f1fa8c>&#34;dbr_to_resource&#34;</span> {
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>name</span>                      = <span style=color:#f1fa8c>&#34;dbr-vent-to-resource-vnet&#34;</span>
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>resource_group_name</span>       = local.rg
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>virtual_network_name</span>      = azurerm_virtual_network.vnet_dbr.name
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>remote_virtual_network_id</span> = azurerm_virtual_network.vnet_resource.id
+</span></span></code></pre></div><h3 id=quick-explanation-2>Quick explanation<a hidden class=anchor aria-hidden=true href=#quick-explanation-2>#</a></h3><p>Note the difference on the subnet compare to the above. Subnets provisioned for storage account and keyvault does not require subnet delegation. However it need the &ldquo;Private endpoint network policy&rdquo; to be enabled before any private endpoint can be deployed in it.</p><h3 id=23-vnet-peering>2.3 vNet peering<a hidden class=anchor aria-hidden=true href=#23-vnet-peering>#</a></h3><p>Virtual network peering ensures the connectivity between two virtual networks. In some environments direct spoke to spoke communication via peering is disable, all traffic between vNet peers goes via hub network, filtered and processed by firewall. However purpose of our lab is to focus on Databricks and private endpoints, we will use peering, a simpler setup to achieve spoke to spoke connectivity. I will write a separate article to talk about best practice of Hub-Spoke topology.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-tf data-lang=tf><span style=display:flex><span><span style=color:#66d9ef>resource</span> <span style=color:#e6db74>&#34;azurerm_virtual_network_peering&#34;</span> <span style=color:#e6db74>&#34;dbr_to_resource&#34;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>name</span>                      = <span style=color:#e6db74>&#34;dbr-vent-to-resource-vnet&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>resource_group_name</span>       = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>rg</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>virtual_network_name</span>      = <span style=color:#a6e22e>azurerm_virtual_network</span>.<span style=color:#a6e22e>vnet_dbr</span>.<span style=color:#a6e22e>name</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>remote_virtual_network_id</span> = <span style=color:#a6e22e>azurerm_virtual_network</span>.<span style=color:#a6e22e>vnet_resource</span>.<span style=color:#a6e22e>id</span>
 </span></span><span style=display:flex><span>}
-</span></span><span style=display:flex><span><span style=color:#ff79c6>
-</span></span></span><span style=display:flex><span><span style=color:#ff79c6>resource</span> <span style=color:#f1fa8c>&#34;azurerm_virtual_network_peering&#34;</span> <span style=color:#f1fa8c>&#34;resource_to_dbr&#34;</span> {
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>name</span>                      = <span style=color:#f1fa8c>&#34;resource-vent-to-dbr-vnet&#34;</span>
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>resource_group_name</span>       = local.rg
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>virtual_network_name</span>      = azurerm_virtual_network.vnet_resource.name
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>remote_virtual_network_id</span> = azurerm_virtual_network.vnet_dbr.id
+</span></span><span style=display:flex><span><span style=color:#66d9ef>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>resource</span> <span style=color:#e6db74>&#34;azurerm_virtual_network_peering&#34;</span> <span style=color:#e6db74>&#34;resource_to_dbr&#34;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>name</span>                      = <span style=color:#e6db74>&#34;resource-vent-to-dbr-vnet&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>resource_group_name</span>       = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>rg</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>virtual_network_name</span>      = <span style=color:#a6e22e>azurerm_virtual_network</span>.<span style=color:#a6e22e>vnet_resource</span>.<span style=color:#a6e22e>name</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>remote_virtual_network_id</span> = <span style=color:#a6e22e>azurerm_virtual_network</span>.<span style=color:#a6e22e>vnet_dbr</span>.<span style=color:#a6e22e>id</span>
 </span></span><span style=display:flex><span>}
-</span></span></code></pre></div><h3 id=quick-explanation-3>Quick explanation<a hidden class=anchor aria-hidden=true href=#quick-explanation-3>#</a></h3><p>The vNet peering needs to be setup from both directions, hence you find that there are two peering blocks required to achieve this.</p><p>Once you have all the code in, lets create resources in a iterative fashion by running</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>terraform plan -var-file<span style=color:#ff79c6>=</span>values.tfvars
-</span></span></code></pre></div><p>followed by:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>terraform apply -auto-approve -var-file<span style=color:#ff79c6>=</span>values.tfvars
+</span></span></code></pre></div><h3 id=quick-explanation-3>Quick explanation<a hidden class=anchor aria-hidden=true href=#quick-explanation-3>#</a></h3><p>The vNet peering needs to be setup from both directions, hence you find that there are two peering blocks required to achieve this.</p><p>Once you have all the code in, lets create resources in a iterative fashion by running</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>terraform plan -var-file<span style=color:#f92672>=</span>values.tfvars
+</span></span></code></pre></div><p>followed by:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>terraform apply -auto-approve -var-file<span style=color:#f92672>=</span>values.tfvars
 </span></span></code></pre></div><p>Let quickly go to the portal and validate that our vNets are created and peering is all connected.
 <img loading=lazy src=/posts/databricks-secure/vNet.png alt=vNe></p><h2 id=part-3-databricks-workspace-and-cluster>Part 3 Databricks workspace and cluster<a hidden class=anchor aria-hidden=true href=#part-3-databricks-workspace-and-cluster>#</a></h2><p>Lets create Databricks workspace and clusters in this part.</p><h3 id=31-databricks-secure-connectivity--vnet-injection>3.1 Databricks secure connectivity + vNet injection<a hidden class=anchor aria-hidden=true href=#31-databricks-secure-connectivity--vnet-injection>#</a></h3><p>To remove the exposure to public internet traffic, clusters can be deployed with no-pubip configuration and deployed into pre-defined vNet.
 First need to add the following to locals block:</p><pre tabindex=0><code>dbr         = &#34;${local.org}-secure-dbr&#34;
@@ -211,65 +211,65 @@ dbr_sku     = &#34;premium&#34;
 dbr_mgmt_rg = &#34;${local.dbr}-mgmt-rg&#34;
 dbr_nsg     = &#34;${local.org}-nsg&#34;
 dbr_cluster = &#34;${local.org}-cluster&#34;
-</code></pre><p>Then add the following to main.tf</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-tf data-lang=tf><span style=display:flex><span><span style=color:#ff79c6>resource</span> <span style=color:#f1fa8c>&#34;azurerm_network_security_group&#34;</span> <span style=color:#f1fa8c>&#34;dbr_nsg&#34;</span> {
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>name</span>                = local.dbr_nsg
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>location</span>            = local.rg_location
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>resource_group_name</span> = azurerm_resource_group.secure_dbr.name
+</code></pre><p>Then add the following to main.tf</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-tf data-lang=tf><span style=display:flex><span><span style=color:#66d9ef>resource</span> <span style=color:#e6db74>&#34;azurerm_network_security_group&#34;</span> <span style=color:#e6db74>&#34;dbr_nsg&#34;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>name</span>                = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>dbr_nsg</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>location</span>            = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>rg_location</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>resource_group_name</span> = <span style=color:#a6e22e>azurerm_resource_group</span>.<span style=color:#a6e22e>secure_dbr</span>.<span style=color:#a6e22e>name</span>
 </span></span><span style=display:flex><span>}
-</span></span><span style=display:flex><span><span style=color:#ff79c6>
-</span></span></span><span style=display:flex><span><span style=color:#ff79c6>resource</span> <span style=color:#f1fa8c>&#34;azurerm_subnet_network_security_group_association&#34;</span> <span style=color:#f1fa8c>&#34;dbr_prv&#34;</span> {
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>subnet_id</span>                 = azurerm_subnet.dbr_prv.id
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>network_security_group_id</span> = azurerm_network_security_group.dbr_nsg.id
+</span></span><span style=display:flex><span><span style=color:#66d9ef>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>resource</span> <span style=color:#e6db74>&#34;azurerm_subnet_network_security_group_association&#34;</span> <span style=color:#e6db74>&#34;dbr_prv&#34;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>subnet_id</span>                 = <span style=color:#a6e22e>azurerm_subnet</span>.<span style=color:#a6e22e>dbr_prv</span>.<span style=color:#a6e22e>id</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>network_security_group_id</span> = <span style=color:#a6e22e>azurerm_network_security_group</span>.<span style=color:#a6e22e>dbr_nsg</span>.<span style=color:#a6e22e>id</span>
 </span></span><span style=display:flex><span>}
-</span></span><span style=display:flex><span><span style=color:#ff79c6>
-</span></span></span><span style=display:flex><span><span style=color:#ff79c6>resource</span> <span style=color:#f1fa8c>&#34;azurerm_subnet_network_security_group_association&#34;</span> <span style=color:#f1fa8c>&#34;dbr_pub&#34;</span> {
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>subnet_id</span>                 = azurerm_subnet.dbr_pub.id
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>network_security_group_id</span> = azurerm_network_security_group.dbr_nsg.id
+</span></span><span style=display:flex><span><span style=color:#66d9ef>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>resource</span> <span style=color:#e6db74>&#34;azurerm_subnet_network_security_group_association&#34;</span> <span style=color:#e6db74>&#34;dbr_pub&#34;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>subnet_id</span>                 = <span style=color:#a6e22e>azurerm_subnet</span>.<span style=color:#a6e22e>dbr_pub</span>.<span style=color:#a6e22e>id</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>network_security_group_id</span> = <span style=color:#a6e22e>azurerm_network_security_group</span>.<span style=color:#a6e22e>dbr_nsg</span>.<span style=color:#a6e22e>id</span>
 </span></span><span style=display:flex><span>}
-</span></span><span style=display:flex><span><span style=color:#ff79c6>
-</span></span></span><span style=display:flex><span><span style=color:#ff79c6>resource</span> <span style=color:#f1fa8c>&#34;azurerm_databricks_workspace&#34;</span> <span style=color:#f1fa8c>&#34;dbr&#34;</span> {
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>name</span>                = local.dbr
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>resource_group_name</span> = local.rg
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>location</span>            = local.rg_location
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>sku</span>                 = local.dbr_sku
+</span></span><span style=display:flex><span><span style=color:#66d9ef>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>resource</span> <span style=color:#e6db74>&#34;azurerm_databricks_workspace&#34;</span> <span style=color:#e6db74>&#34;dbr&#34;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>name</span>                = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>dbr</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>resource_group_name</span> = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>rg</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>location</span>            = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>rg_location</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>sku</span>                 = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>dbr_sku</span>
 </span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>managed_resource_group_name</span> = local.dbr_mgmt_rg
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>managed_resource_group_name</span> = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>dbr_mgmt_rg</span>
 </span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>  custom_parameters {
-</span></span><span style=display:flex><span>    <span style=color:#50fa7b>no_public_ip</span>        = <span style=color:#ff79c6>true</span>
-</span></span><span style=display:flex><span>    <span style=color:#50fa7b>virtual_network_id</span>  = azurerm_virtual_network.vnet_dbr.id
-</span></span><span style=display:flex><span>    <span style=color:#50fa7b>public_subnet_name</span>  = azurerm_subnet.dbr_pub.name
-</span></span><span style=display:flex><span>    <span style=color:#50fa7b>private_subnet_name</span> = azurerm_subnet.dbr_prv.name
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>custom_parameters</span> {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>no_public_ip</span>        = <span style=color:#66d9ef>true</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>virtual_network_id</span>  = <span style=color:#a6e22e>azurerm_virtual_network</span>.<span style=color:#a6e22e>vnet_dbr</span>.<span style=color:#a6e22e>id</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>public_subnet_name</span>  = <span style=color:#a6e22e>azurerm_subnet</span>.<span style=color:#a6e22e>dbr_pub</span>.<span style=color:#a6e22e>name</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>private_subnet_name</span> = <span style=color:#a6e22e>azurerm_subnet</span>.<span style=color:#a6e22e>dbr_prv</span>.<span style=color:#a6e22e>name</span>
 </span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#50fa7b>public_subnet_network_security_group_association_id</span>  = azurerm_subnet_network_security_group_association.dbr_pub.id
-</span></span><span style=display:flex><span>    <span style=color:#50fa7b>private_subnet_network_security_group_association_id</span> = azurerm_subnet_network_security_group_association.dbr_prv.id
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>public_subnet_network_security_group_association_id</span>  = <span style=color:#a6e22e>azurerm_subnet_network_security_group_association</span>.<span style=color:#a6e22e>dbr_pub</span>.<span style=color:#a6e22e>id</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>private_subnet_network_security_group_association_id</span> = <span style=color:#a6e22e>azurerm_subnet_network_security_group_association</span>.<span style=color:#a6e22e>dbr_prv</span>.<span style=color:#a6e22e>id</span>
 </span></span><span style=display:flex><span>  }
 </span></span><span style=display:flex><span>}
 </span></span></code></pre></div><h3 id=quick-explanation-4>Quick explanation<a hidden class=anchor aria-hidden=true href=#quick-explanation-4>#</a></h3><p>Line 1-15 defines the network security group and the association, this is mandatory for databricks cluster vNet injection.
 Line 17-34 defines the databricks workspace with existing vNet and subnets.
 Line 26 configures databricks cluster to have not public IP.<div class=Note style=background-color:var(--note);font-size:15px;margin-bottom:10px;margin-top:10px;padding:10px;border-radius:10px><i class="fas fa-exclamation-triangle"></i>
-Please customize your NSG if you are using this in higher environments, current configuration is minimal so that we could focus on the lab. Please always go with Security first principle.</div></p><h3 id=32-cluster-creation>3.2 Cluster creation<a hidden class=anchor aria-hidden=true href=#32-cluster-creation>#</a></h3><p>We will use terraform to create clusters, note we will need to add <a href=https://registry.terraform.io/providers/databrickslabs/databricks/latest/docs>databricks provider</a> to terraform which was already performed in earlier steps.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>resource <span style=color:#f1fa8c>&#34;databricks_cluster&#34;</span> <span style=color:#f1fa8c>&#34;cluster&#34;</span> <span style=color:#ff79c6>{</span>
-</span></span><span style=display:flex><span>  <span style=color:#8be9fd;font-style:italic>cluster_name</span>            <span style=color:#ff79c6>=</span> local.dbr_cluster
-</span></span><span style=display:flex><span>  <span style=color:#8be9fd;font-style:italic>spark_version</span>           <span style=color:#ff79c6>=</span> data.databricks_spark_version.latest.id
-</span></span><span style=display:flex><span>  <span style=color:#8be9fd;font-style:italic>node_type_id</span>            <span style=color:#ff79c6>=</span> data.databricks_node_type.smallest.id
-</span></span><span style=display:flex><span>  <span style=color:#8be9fd;font-style:italic>autotermination_minutes</span> <span style=color:#ff79c6>=</span> <span style=color:#bd93f9>20</span>
-</span></span><span style=display:flex><span>  <span style=color:#8be9fd;font-style:italic>spark_conf</span> <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>{</span>
-</span></span><span style=display:flex><span>    <span style=color:#f1fa8c>&#34;spark.databricks.cluster.profile&#34;</span> : <span style=color:#f1fa8c>&#34;singleNode&#34;</span>
-</span></span><span style=display:flex><span>    <span style=color:#f1fa8c>&#34;spark.master&#34;</span> : <span style=color:#f1fa8c>&#34;local[*]&#34;</span>
-</span></span><span style=display:flex><span>  <span style=color:#ff79c6>}</span>
+Please customize your NSG if you are using this in higher environments, current configuration is minimal so that we could focus on the lab. Please always go with Security first principle.</div></p><h3 id=32-cluster-creation>3.2 Cluster creation<a hidden class=anchor aria-hidden=true href=#32-cluster-creation>#</a></h3><p>We will use terraform to create clusters, note we will need to add <a href=https://registry.terraform.io/providers/databrickslabs/databricks/latest/docs>databricks provider</a> to terraform which was already performed in earlier steps.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>resource <span style=color:#e6db74>&#34;databricks_cluster&#34;</span> <span style=color:#e6db74>&#34;cluster&#34;</span> <span style=color:#f92672>{</span>
+</span></span><span style=display:flex><span>  cluster_name            <span style=color:#f92672>=</span> local.dbr_cluster
+</span></span><span style=display:flex><span>  spark_version           <span style=color:#f92672>=</span> data.databricks_spark_version.latest.id
+</span></span><span style=display:flex><span>  node_type_id            <span style=color:#f92672>=</span> data.databricks_node_type.smallest.id
+</span></span><span style=display:flex><span>  autotermination_minutes <span style=color:#f92672>=</span> <span style=color:#ae81ff>20</span>
+</span></span><span style=display:flex><span>  spark_conf <span style=color:#f92672>=</span> <span style=color:#f92672>{</span>
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;spark.databricks.cluster.profile&#34;</span> : <span style=color:#e6db74>&#34;singleNode&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;spark.master&#34;</span> : <span style=color:#e6db74>&#34;local[*]&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>}</span>
 </span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>  <span style=color:#8be9fd;font-style:italic>custom_tags</span> <span style=color:#ff79c6>=</span> <span style=color:#ff79c6>{</span>
-</span></span><span style=display:flex><span>    <span style=color:#f1fa8c>&#34;ResourceClass&#34;</span> <span style=color:#ff79c6>=</span> <span style=color:#f1fa8c>&#34;SingleNode&#34;</span>
-</span></span><span style=display:flex><span>  <span style=color:#ff79c6>}</span>
-</span></span><span style=display:flex><span><span style=color:#ff79c6>}</span>
+</span></span><span style=display:flex><span>  custom_tags <span style=color:#f92672>=</span> <span style=color:#f92672>{</span>
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;ResourceClass&#34;</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#34;SingleNode&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>}</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>}</span>
 </span></span></code></pre></div><p>you will also need to add the following to the data.tf file so that databricks provide can retrieve some information dynamically for the provisioning.
-data.tf</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-tf data-lang=tf><span style=display:flex><span><span style=color:#ff79c6>data</span> <span style=color:#f1fa8c>&#34;databricks_spark_version&#34;</span> <span style=color:#f1fa8c>&#34;latest&#34;</span> {}
-</span></span><span style=display:flex><span><span style=color:#ff79c6>
-</span></span></span><span style=display:flex><span><span style=color:#ff79c6>data</span> <span style=color:#f1fa8c>&#34;databricks_node_type&#34;</span> <span style=color:#f1fa8c>&#34;smallest&#34;</span> {
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>local_disk</span> = <span style=color:#ff79c6>true</span>
+data.tf</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-tf data-lang=tf><span style=display:flex><span><span style=color:#66d9ef>data</span> <span style=color:#e6db74>&#34;databricks_spark_version&#34;</span> <span style=color:#e6db74>&#34;latest&#34;</span> {}
+</span></span><span style=display:flex><span><span style=color:#66d9ef>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>data</span> <span style=color:#e6db74>&#34;databricks_node_type&#34;</span> <span style=color:#e6db74>&#34;smallest&#34;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>local_disk</span> = <span style=color:#66d9ef>true</span>
 </span></span><span style=display:flex><span>}
-</span></span></code></pre></div><h3 id=quick-explanation-5>Quick explanation<a hidden class=anchor aria-hidden=true href=#quick-explanation-5>#</a></h3><p>The cluster we provisioned is single cluster which is capable enough to help to complete the lab.</p><p>Once you have all the code in, lets create resources in a iterative fashion by running</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>terraform plan -var-file<span style=color:#ff79c6>=</span>values.tfvars
-</span></span></code></pre></div><p>followed by:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>terraform apply -auto-approve -var-file<span style=color:#ff79c6>=</span>values.tfvars
+</span></span></code></pre></div><h3 id=quick-explanation-5>Quick explanation<a hidden class=anchor aria-hidden=true href=#quick-explanation-5>#</a></h3><p>The cluster we provisioned is single cluster which is capable enough to help to complete the lab.</p><p>Once you have all the code in, lets create resources in a iterative fashion by running</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>terraform plan -var-file<span style=color:#f92672>=</span>values.tfvars
+</span></span></code></pre></div><p>followed by:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>terraform apply -auto-approve -var-file<span style=color:#f92672>=</span>values.tfvars
 </span></span></code></pre></div><p>Lets login to our databricks instance and validate the cluster is in place.
 <img loading=lazy src=/posts/databricks-secure/cluster.png alt=cluster></p><h2 id=part-4-adls--keyvault-with-private-endpoint>Part 4 ADLS + Keyvault with Private endpoint<a hidden class=anchor aria-hidden=true href=#part-4-adls--keyvault-with-private-endpoint>#</a></h2><p>Lets create ADLS account and Keyvault in this part with private endpoints and private DNS zones.
 <a href=https://docs.microsoft.com/en-us/azure/private-link/private-endpoint-dns>private DNS zone</a> is required so that a Azure private link DNS address could be resolved to the private IP address for the private endpoint.</p><h3 id=41-storage-account-with-private-endpoint-and-private-dns-zone>4.1 Storage account with private endpoint and private DNS zone<a hidden class=anchor aria-hidden=true href=#41-storage-account-with-private-endpoint-and-private-dns-zone>#</a></h3><p>This part shouldnt be too bad, a storage account with private endpoint deployed to the spoke network.</p><p>First need to add the following to the locals block:</p><pre tabindex=0><code>stor         = &#34;${local.org}stor&#34;
@@ -279,162 +279,162 @@ stor_prv_con = &#34;${local.stor}prvcon&#34;
 kv         = &#34;${local.org}-kv&#34;
 kv_pe      = &#34;${local.kv}pe&#34;
 kv_prv_con = &#34;${local.kv}prvcon&#34;
-</code></pre><p>Then add the following to main.tf file：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-tf data-lang=tf><span style=display:flex><span><span style=color:#ff79c6>resource</span> <span style=color:#f1fa8c>&#34;azurerm_storage_account&#34;</span> <span style=color:#f1fa8c>&#34;stor&#34;</span> {
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>name</span>                = local.stor
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>resource_group_name</span> = local.rg
+</code></pre><p>Then add the following to main.tf file：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-tf data-lang=tf><span style=display:flex><span><span style=color:#66d9ef>resource</span> <span style=color:#e6db74>&#34;azurerm_storage_account&#34;</span> <span style=color:#e6db74>&#34;stor&#34;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>name</span>                = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>stor</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>resource_group_name</span> = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>rg</span>
 </span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>location</span>                 = local.rg_location
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>account_tier</span>             = <span style=color:#f1fa8c>&#34;Standard&#34;</span>
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>account_replication_type</span> = <span style=color:#f1fa8c>&#34;LRS&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>location</span>                 = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>rg_location</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>account_tier</span>             = <span style=color:#e6db74>&#34;Standard&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>account_replication_type</span> = <span style=color:#e6db74>&#34;LRS&#34;</span>
 </span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>is_hns_enabled</span> = <span style=color:#ff79c6>true</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>is_hns_enabled</span> = <span style=color:#66d9ef>true</span>
 </span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>  network_rules {
-</span></span><span style=display:flex><span>    <span style=color:#50fa7b>default_action</span> = <span style=color:#f1fa8c>&#34;Deny&#34;</span>
-</span></span><span style=display:flex><span>    <span style=color:#50fa7b>ip_rules</span>       = [<span style=color:#8be9fd;font-style:italic>data</span>.external.my_ip.result.ip]
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>network_rules</span> {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>default_action</span> = <span style=color:#e6db74>&#34;Deny&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>ip_rules</span>       = [data.<span style=color:#a6e22e>external</span>.<span style=color:#a6e22e>my_ip</span>.<span style=color:#a6e22e>result</span>.<span style=color:#a6e22e>ip</span>]
 </span></span><span style=display:flex><span>  }
 </span></span><span style=display:flex><span>}
-</span></span><span style=display:flex><span><span style=color:#ff79c6>
-</span></span></span><span style=display:flex><span><span style=color:#ff79c6>resource</span> <span style=color:#f1fa8c>&#34;azurerm_storage_container&#34;</span> <span style=color:#f1fa8c>&#34;container&#34;</span> {
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>name</span>                  = <span style=color:#f1fa8c>&#34;land&#34;</span>
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>storage_account_name</span>  = azurerm_storage_account.stor.name
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>container_access_type</span> = <span style=color:#f1fa8c>&#34;private&#34;</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>resource</span> <span style=color:#e6db74>&#34;azurerm_storage_container&#34;</span> <span style=color:#e6db74>&#34;container&#34;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>name</span>                  = <span style=color:#e6db74>&#34;land&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>storage_account_name</span>  = <span style=color:#a6e22e>azurerm_storage_account</span>.<span style=color:#a6e22e>stor</span>.<span style=color:#a6e22e>name</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>container_access_type</span> = <span style=color:#e6db74>&#34;private&#34;</span>
 </span></span><span style=display:flex><span>}
-</span></span><span style=display:flex><span><span style=color:#ff79c6>
-</span></span></span><span style=display:flex><span><span style=color:#ff79c6>resource</span> <span style=color:#f1fa8c>&#34;azurerm_private_endpoint&#34;</span> <span style=color:#f1fa8c>&#34;stor_pe&#34;</span> {
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>name</span>                = local.stor_pe
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>location</span>            = local.rg_location
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>resource_group_name</span> = local.rg
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>subnet_id</span>           = azurerm_subnet.resource_stor.id
+</span></span><span style=display:flex><span><span style=color:#66d9ef>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>resource</span> <span style=color:#e6db74>&#34;azurerm_private_endpoint&#34;</span> <span style=color:#e6db74>&#34;stor_pe&#34;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>name</span>                = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>stor_pe</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>location</span>            = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>rg_location</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>resource_group_name</span> = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>rg</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>subnet_id</span>           = <span style=color:#a6e22e>azurerm_subnet</span>.<span style=color:#a6e22e>resource_stor</span>.<span style=color:#a6e22e>id</span>
 </span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>  private_service_connection {
-</span></span><span style=display:flex><span>    <span style=color:#50fa7b>name</span>                           = local.stor_prv_con
-</span></span><span style=display:flex><span>    <span style=color:#50fa7b>private_connection_resource_id</span> = azurerm_storage_account.stor.id
-</span></span><span style=display:flex><span>    <span style=color:#50fa7b>is_manual_connection</span>           = <span style=color:#ff79c6>false</span>
-</span></span><span style=display:flex><span>    <span style=color:#50fa7b>subresource_names</span>              = [<span style=color:#f1fa8c>&#34;dfs&#34;</span>]
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>private_service_connection</span> {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>name</span>                           = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>stor_prv_con</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>private_connection_resource_id</span> = <span style=color:#a6e22e>azurerm_storage_account</span>.<span style=color:#a6e22e>stor</span>.<span style=color:#a6e22e>id</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>is_manual_connection</span>           = <span style=color:#66d9ef>false</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>subresource_names</span>              = [<span style=color:#e6db74>&#34;dfs&#34;</span>]
 </span></span><span style=display:flex><span>  }
 </span></span><span style=display:flex><span>}
-</span></span><span style=display:flex><span><span style=color:#ff79c6>
-</span></span></span><span style=display:flex><span><span style=color:#ff79c6>resource</span> <span style=color:#f1fa8c>&#34;azurerm_private_dns_zone&#34;</span> <span style=color:#f1fa8c>&#34;stor_dfs&#34;</span> {
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>name</span>                = <span style=color:#f1fa8c>&#34;privatelink.dfs.core.windows.net&#34;</span>
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>resource_group_name</span> = local.rg
+</span></span><span style=display:flex><span><span style=color:#66d9ef>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>resource</span> <span style=color:#e6db74>&#34;azurerm_private_dns_zone&#34;</span> <span style=color:#e6db74>&#34;stor_dfs&#34;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>name</span>                = <span style=color:#e6db74>&#34;privatelink.dfs.core.windows.net&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>resource_group_name</span> = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>rg</span>
 </span></span><span style=display:flex><span>}
-</span></span><span style=display:flex><span><span style=color:#ff79c6>
-</span></span></span><span style=display:flex><span><span style=color:#ff79c6>resource</span> <span style=color:#f1fa8c>&#34;azurerm_private_dns_zone_virtual_network_link&#34;</span> <span style=color:#f1fa8c>&#34;dbr_vnet_link_stor&#34;</span> {
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>name</span>                  = <span style=color:#f1fa8c>&#34;dbr_vnet_link&#34;</span>
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>resource_group_name</span>   = local.rg
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>private_dns_zone_name</span> = azurerm_private_dns_zone.stor_dfs.name
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>virtual_network_id</span>    = azurerm_virtual_network.vnet_dbr.id
+</span></span><span style=display:flex><span><span style=color:#66d9ef>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>resource</span> <span style=color:#e6db74>&#34;azurerm_private_dns_zone_virtual_network_link&#34;</span> <span style=color:#e6db74>&#34;dbr_vnet_link_stor&#34;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>name</span>                  = <span style=color:#e6db74>&#34;dbr_vnet_link&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>resource_group_name</span>   = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>rg</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>private_dns_zone_name</span> = <span style=color:#a6e22e>azurerm_private_dns_zone</span>.<span style=color:#a6e22e>stor_dfs</span>.<span style=color:#a6e22e>name</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>virtual_network_id</span>    = <span style=color:#a6e22e>azurerm_virtual_network</span>.<span style=color:#a6e22e>vnet_dbr</span>.<span style=color:#a6e22e>id</span>
 </span></span><span style=display:flex><span>}
-</span></span><span style=display:flex><span><span style=color:#ff79c6>
-</span></span></span><span style=display:flex><span><span style=color:#ff79c6>resource</span> <span style=color:#f1fa8c>&#34;azurerm_private_dns_a_record&#34;</span> <span style=color:#f1fa8c>&#34;storpe_dns&#34;</span> {
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>name</span>                = local.stor
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>zone_name</span>           = azurerm_private_dns_zone.stor_dfs.name
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>resource_group_name</span> = local.rg
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>ttl</span>                 = <span style=color:#bd93f9>300</span>
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>records</span>             = [azurerm_private_endpoint.stor_pe.private_service_connection.<span style=color:#bd93f9>0</span>.private_ip_address]
+</span></span><span style=display:flex><span><span style=color:#66d9ef>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>resource</span> <span style=color:#e6db74>&#34;azurerm_private_dns_a_record&#34;</span> <span style=color:#e6db74>&#34;storpe_dns&#34;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>name</span>                = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>stor</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>zone_name</span>           = <span style=color:#a6e22e>azurerm_private_dns_zone</span>.<span style=color:#a6e22e>stor_dfs</span>.<span style=color:#a6e22e>name</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>resource_group_name</span> = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>rg</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>ttl</span>                 = <span style=color:#ae81ff>300</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>records</span>             = [<span style=color:#a6e22e>azurerm_private_endpoint</span>.<span style=color:#a6e22e>stor_pe</span>.<span style=color:#a6e22e>private_service_connection</span>.<span style=color:#ae81ff>0</span>.<span style=color:#a6e22e>private_ip_address</span>]
 </span></span><span style=display:flex><span>}
-</span></span></code></pre></div><h3 id=quick-explanation-6>Quick explanation<a hidden class=anchor aria-hidden=true href=#quick-explanation-6>#</a></h3><p>Line 11-14 defined the firewall rules so that we are not open our storage account to public by default. Note the &ldquo;data.external.my_ip.result.ip&rdquo;, because we still want to be operate the storage account from out local machine hence the data block retrieve your current public ip and inject that to network policy. You will also need to add the following to your data.tf file：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-tf data-lang=tf><span style=display:flex><span><span style=color:#ff79c6>data</span> <span style=color:#f1fa8c>&#34;external&#34;</span> <span style=color:#f1fa8c>&#34;my_ip&#34;</span> {
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>program</span> = [<span style=color:#f1fa8c>&#34;curl&#34;</span>, <span style=color:#f1fa8c>&#34;https://api.ipify.org?format=json&#34;</span>]
+</span></span></code></pre></div><h3 id=quick-explanation-6>Quick explanation<a hidden class=anchor aria-hidden=true href=#quick-explanation-6>#</a></h3><p>Line 11-14 defined the firewall rules so that we are not open our storage account to public by default. Note the &ldquo;data.external.my_ip.result.ip&rdquo;, because we still want to be operate the storage account from out local machine hence the data block retrieve your current public ip and inject that to network policy. You will also need to add the following to your data.tf file：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-tf data-lang=tf><span style=display:flex><span><span style=color:#66d9ef>data</span> <span style=color:#e6db74>&#34;external&#34;</span> <span style=color:#e6db74>&#34;my_ip&#34;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>program</span> = [<span style=color:#e6db74>&#34;curl&#34;</span>, <span style=color:#e6db74>&#34;https://api.ipify.org?format=json&#34;</span>]
 </span></span><span style=display:flex><span>}
 </span></span></code></pre></div><p>Line 23-35 created the private endpoint targeting the storage account resource.
 Line 37-47 creates a Azure private dns zone for ADLS, and link that to the dbr network, so that DNS request from the dbr network could use this for name resolution.
 Line 38 specifies the top level domain name for the storage account in the private DNZ zone.
 Line 49-55 creates a private DNS record using the private ip address of the network interface as part of private endpoint provisioning.<div class=Note style=background-color:var(--note);font-size:15px;margin-bottom:10px;margin-top:10px;padding:10px;border-radius:10px><i class="fas fa-exclamation-triangle"></i>
-Note when creating private endpoint, there will be a network interface attached to it which gets a private ip address allocated in the subnet range.</div></p><h3 id=42-keyvault-with-private-endpoint-and-private-dns-zone>4.2 Keyvault with private endpoint and private DNS zone<a hidden class=anchor aria-hidden=true href=#42-keyvault-with-private-endpoint-and-private-dns-zone>#</a></h3><p>This one is not too bad either, keyvualt with private endpoint deployed to the same spoke network with similar setup on the private DNS zone, vNet linkage and dns records</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-tf data-lang=tf><span style=display:flex><span><span style=color:#ff79c6>resource</span> <span style=color:#f1fa8c>&#34;azurerm_key_vault&#34;</span> <span style=color:#f1fa8c>&#34;kv&#34;</span> {
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>name</span>                        = local.kv
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>location</span>                    = local.rg_location
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>resource_group_name</span>         = local.rg
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>enabled_for_disk_encryption</span> = <span style=color:#ff79c6>true</span>
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>tenant_id</span>                   = <span style=color:#8be9fd;font-style:italic>data</span>.azurerm_client_config.current.tenant_id
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>soft_delete_retention_days</span>  = <span style=color:#bd93f9>7</span>
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>purge_protection_enabled</span>    = <span style=color:#ff79c6>false</span>
+Note when creating private endpoint, there will be a network interface attached to it which gets a private ip address allocated in the subnet range.</div></p><h3 id=42-keyvault-with-private-endpoint-and-private-dns-zone>4.2 Keyvault with private endpoint and private DNS zone<a hidden class=anchor aria-hidden=true href=#42-keyvault-with-private-endpoint-and-private-dns-zone>#</a></h3><p>This one is not too bad either, keyvualt with private endpoint deployed to the same spoke network with similar setup on the private DNS zone, vNet linkage and dns records</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-tf data-lang=tf><span style=display:flex><span><span style=color:#66d9ef>resource</span> <span style=color:#e6db74>&#34;azurerm_key_vault&#34;</span> <span style=color:#e6db74>&#34;kv&#34;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>name</span>                        = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>kv</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>location</span>                    = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>rg_location</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>resource_group_name</span>         = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>rg</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>enabled_for_disk_encryption</span> = <span style=color:#66d9ef>true</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>tenant_id</span>                   = data.<span style=color:#a6e22e>azurerm_client_config</span>.<span style=color:#a6e22e>current</span>.<span style=color:#a6e22e>tenant_id</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>soft_delete_retention_days</span>  = <span style=color:#ae81ff>7</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>purge_protection_enabled</span>    = <span style=color:#66d9ef>false</span>
 </span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>sku_name</span> = <span style=color:#f1fa8c>&#34;standard&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>sku_name</span> = <span style=color:#e6db74>&#34;standard&#34;</span>
 </span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>  network_acls {
-</span></span><span style=display:flex><span>    <span style=color:#50fa7b>default_action</span> = <span style=color:#f1fa8c>&#34;Deny&#34;</span>
-</span></span><span style=display:flex><span>    <span style=color:#50fa7b>bypass</span> = <span style=color:#f1fa8c>&#34;AzureServices&#34;</span>
-</span></span><span style=display:flex><span>    <span style=color:#50fa7b>ip_rules</span> = [<span style=color:#8be9fd;font-style:italic>data</span>.external.my_ip.result.ip]
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>network_acls</span> {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>default_action</span> = <span style=color:#e6db74>&#34;Deny&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>bypass</span> = <span style=color:#e6db74>&#34;AzureServices&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>ip_rules</span> = [data.<span style=color:#a6e22e>external</span>.<span style=color:#a6e22e>my_ip</span>.<span style=color:#a6e22e>result</span>.<span style=color:#a6e22e>ip</span>]
 </span></span><span style=display:flex><span>  }
 </span></span><span style=display:flex><span>}
-</span></span><span style=display:flex><span><span style=color:#ff79c6>
-</span></span></span><span style=display:flex><span><span style=color:#ff79c6>resource</span> <span style=color:#f1fa8c>&#34;azurerm_private_endpoint&#34;</span> <span style=color:#f1fa8c>&#34;kv_pe&#34;</span> {
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>name</span>                = local.kv_pe
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>location</span>            = local.rg_location
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>resource_group_name</span> = local.rg
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>subnet_id</span>           = azurerm_subnet.resource_kv.id
+</span></span><span style=display:flex><span><span style=color:#66d9ef>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>resource</span> <span style=color:#e6db74>&#34;azurerm_private_endpoint&#34;</span> <span style=color:#e6db74>&#34;kv_pe&#34;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>name</span>                = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>kv_pe</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>location</span>            = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>rg_location</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>resource_group_name</span> = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>rg</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>subnet_id</span>           = <span style=color:#a6e22e>azurerm_subnet</span>.<span style=color:#a6e22e>resource_kv</span>.<span style=color:#a6e22e>id</span>
 </span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>  private_service_connection {
-</span></span><span style=display:flex><span>    <span style=color:#50fa7b>name</span>                           = local.kv_prv_con
-</span></span><span style=display:flex><span>    <span style=color:#50fa7b>private_connection_resource_id</span> = azurerm_key_vault.kv.id
-</span></span><span style=display:flex><span>    <span style=color:#50fa7b>is_manual_connection</span>           = <span style=color:#ff79c6>false</span>
-</span></span><span style=display:flex><span>    <span style=color:#50fa7b>subresource_names</span>              = [<span style=color:#f1fa8c>&#34;Vault&#34;</span>]
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>private_service_connection</span> {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>name</span>                           = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>kv_prv_con</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>private_connection_resource_id</span> = <span style=color:#a6e22e>azurerm_key_vault</span>.<span style=color:#a6e22e>kv</span>.<span style=color:#a6e22e>id</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>is_manual_connection</span>           = <span style=color:#66d9ef>false</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>subresource_names</span>              = [<span style=color:#e6db74>&#34;Vault&#34;</span>]
 </span></span><span style=display:flex><span>  }
 </span></span><span style=display:flex><span>}
-</span></span><span style=display:flex><span><span style=color:#ff79c6>
-</span></span></span><span style=display:flex><span><span style=color:#ff79c6>resource</span> <span style=color:#f1fa8c>&#34;azurerm_private_dns_zone&#34;</span> <span style=color:#f1fa8c>&#34;kv&#34;</span> {
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>name</span>                = <span style=color:#f1fa8c>&#34;privatelink.vaultcore.azure.net&#34;</span>
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>resource_group_name</span> = local.rg
+</span></span><span style=display:flex><span><span style=color:#66d9ef>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>resource</span> <span style=color:#e6db74>&#34;azurerm_private_dns_zone&#34;</span> <span style=color:#e6db74>&#34;kv&#34;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>name</span>                = <span style=color:#e6db74>&#34;privatelink.vaultcore.azure.net&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>resource_group_name</span> = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>rg</span>
 </span></span><span style=display:flex><span>}
-</span></span><span style=display:flex><span><span style=color:#ff79c6>
-</span></span></span><span style=display:flex><span><span style=color:#ff79c6>resource</span> <span style=color:#f1fa8c>&#34;azurerm_private_dns_zone_virtual_network_link&#34;</span> <span style=color:#f1fa8c>&#34;dbr_vnet_link_kv&#34;</span> {
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>name</span>                  = <span style=color:#f1fa8c>&#34;dbr_vnet_link_kv&#34;</span>
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>resource_group_name</span>   = local.rg
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>private_dns_zone_name</span> = azurerm_private_dns_zone.kv.name
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>virtual_network_id</span>    = azurerm_virtual_network.vnet_dbr.id
+</span></span><span style=display:flex><span><span style=color:#66d9ef>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>resource</span> <span style=color:#e6db74>&#34;azurerm_private_dns_zone_virtual_network_link&#34;</span> <span style=color:#e6db74>&#34;dbr_vnet_link_kv&#34;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>name</span>                  = <span style=color:#e6db74>&#34;dbr_vnet_link_kv&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>resource_group_name</span>   = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>rg</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>private_dns_zone_name</span> = <span style=color:#a6e22e>azurerm_private_dns_zone</span>.<span style=color:#a6e22e>kv</span>.<span style=color:#a6e22e>name</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>virtual_network_id</span>    = <span style=color:#a6e22e>azurerm_virtual_network</span>.<span style=color:#a6e22e>vnet_dbr</span>.<span style=color:#a6e22e>id</span>
 </span></span><span style=display:flex><span>}
-</span></span><span style=display:flex><span><span style=color:#ff79c6>
-</span></span></span><span style=display:flex><span><span style=color:#ff79c6>resource</span> <span style=color:#f1fa8c>&#34;azurerm_private_dns_a_record&#34;</span> <span style=color:#f1fa8c>&#34;kvpe_dns&#34;</span> {
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>name</span>                = local.kv
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>zone_name</span>           = azurerm_private_dns_zone.kv.name
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>resource_group_name</span> = local.rg
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>ttl</span>                 = <span style=color:#bd93f9>300</span>
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>records</span>             = [azurerm_private_endpoint.kv_pe.private_service_connection.<span style=color:#bd93f9>0</span>.private_ip_address]
+</span></span><span style=display:flex><span><span style=color:#66d9ef>
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>resource</span> <span style=color:#e6db74>&#34;azurerm_private_dns_a_record&#34;</span> <span style=color:#e6db74>&#34;kvpe_dns&#34;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>name</span>                = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>kv</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>zone_name</span>           = <span style=color:#a6e22e>azurerm_private_dns_zone</span>.<span style=color:#a6e22e>kv</span>.<span style=color:#a6e22e>name</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>resource_group_name</span> = <span style=color:#a6e22e>local</span>.<span style=color:#a6e22e>rg</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>ttl</span>                 = <span style=color:#ae81ff>300</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>records</span>             = [<span style=color:#a6e22e>azurerm_private_endpoint</span>.<span style=color:#a6e22e>kv_pe</span>.<span style=color:#a6e22e>private_service_connection</span>.<span style=color:#ae81ff>0</span>.<span style=color:#a6e22e>private_ip_address</span>]
 </span></span><span style=display:flex><span>}
-</span></span></code></pre></div><p>Once you have all the code in, lets create resources in a iterative fashion by running</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>terraform plan -var-file<span style=color:#ff79c6>=</span>values.tfvars
-</span></span></code></pre></div><p>followed by:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>terraform apply -auto-approve -var-file<span style=color:#ff79c6>=</span>values.tfvars
-</span></span></code></pre></div><h2 id=part-5-databricks-configuration---keyvault-backed-secret-scope>Part 5 Databricks configuration - Keyvault backed secret scope<a hidden class=anchor aria-hidden=true href=#part-5-databricks-configuration---keyvault-backed-secret-scope>#</a></h2><p>To create the keyvault backed secret scope, terraform provides a handy resource to do this. add the following to the main.tf files to achieve this.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-tf data-lang=tf><span style=display:flex><span><span style=color:#ff79c6>resource</span> <span style=color:#f1fa8c>&#34;databricks_secret_scope&#34;</span> <span style=color:#f1fa8c>&#34;kv&#34;</span> {
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>name</span> = <span style=color:#f1fa8c>&#34;keyvault-managed&#34;</span>
+</span></span></code></pre></div><p>Once you have all the code in, lets create resources in a iterative fashion by running</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>terraform plan -var-file<span style=color:#f92672>=</span>values.tfvars
+</span></span></code></pre></div><p>followed by:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>terraform apply -auto-approve -var-file<span style=color:#f92672>=</span>values.tfvars
+</span></span></code></pre></div><h2 id=part-5-databricks-configuration---keyvault-backed-secret-scope>Part 5 Databricks configuration - Keyvault backed secret scope<a hidden class=anchor aria-hidden=true href=#part-5-databricks-configuration---keyvault-backed-secret-scope>#</a></h2><p>To create the keyvault backed secret scope, terraform provides a handy resource to do this. add the following to the main.tf files to achieve this.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-tf data-lang=tf><span style=display:flex><span><span style=color:#66d9ef>resource</span> <span style=color:#e6db74>&#34;databricks_secret_scope&#34;</span> <span style=color:#e6db74>&#34;kv&#34;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>name</span> = <span style=color:#e6db74>&#34;keyvault-managed&#34;</span>
 </span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>  keyvault_metadata {
-</span></span><span style=display:flex><span>    <span style=color:#50fa7b>resource_id</span> = azurerm_key_vault.kv.id
-</span></span><span style=display:flex><span>    <span style=color:#50fa7b>dns_name</span>    = azurerm_key_vault.kv.vault_uri
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>keyvault_metadata</span> {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>resource_id</span> = <span style=color:#a6e22e>azurerm_key_vault</span>.<span style=color:#a6e22e>kv</span>.<span style=color:#a6e22e>id</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>dns_name</span>    = <span style=color:#a6e22e>azurerm_key_vault</span>.<span style=color:#a6e22e>kv</span>.<span style=color:#a6e22e>vault_uri</span>
 </span></span><span style=display:flex><span>  }
 </span></span><span style=display:flex><span>}
 </span></span></code></pre></div><p>The tricky part here is that according to terraform this is only supported by azure cli authentication but NOT with service principal authentication. You will see error like this if service principal auth is used:
 <img loading=lazy src=/posts/databricks-secure/error.png alt=error>
 what you will need to do is to comment out the azurerm authentication part in the providers.tf and then login to Azure using</p><pre tabindex=0><code>az login
 </code></pre><p>If you haven&rsquo;t installed Az cli following <a href=https://docs.microsoft.com/en-us/cli/azure/install-azure-cli>this</a> to install and read more details of this limitation <a href=https://registry.terraform.io/providers/databrickslabs/databricks/latest/docs/resources/secret_scope>here</a>.</p><h2 id=part-6-run-notebook-to-validate>Part 6 Run notebook to validate<a hidden class=anchor aria-hidden=true href=#part-6-run-notebook-to-validate>#</a></h2><p>Let put some python code in and test the connectivity and DNS resolutions.
-The first and most important task is to validate the connectivity and DNS resolution. You can run this code snippet in a notebook to check them.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#ff79c6>import</span> socket
-</span></span><span style=display:flex><span>stor <span style=color:#ff79c6>=</span> socket<span style=color:#ff79c6>.</span>gethostbyname_ex(<span style=color:#f1fa8c>&#34;blkstor.dfs.core.windows.net&#34;</span>)
-</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>print</span> (<span style=color:#f1fa8c>&#34;</span><span style=color:#f1fa8c>\n\n</span><span style=color:#f1fa8c>The IP Address of the Domain Name is: &#34;</span> <span style=color:#ff79c6>+</span> <span style=color:#8be9fd;font-style:italic>repr</span>(stor))
-</span></span><span style=display:flex><span>kv <span style=color:#ff79c6>=</span> socket<span style=color:#ff79c6>.</span>gethostbyname_ex(<span style=color:#f1fa8c>&#34;blk-kv.vault.azure.net&#34;</span>)
-</span></span><span style=display:flex><span><span style=color:#8be9fd;font-style:italic>print</span> (<span style=color:#f1fa8c>&#34;</span><span style=color:#f1fa8c>\n\n</span><span style=color:#f1fa8c>The IP Address of the Domain Name is: &#34;</span> <span style=color:#ff79c6>+</span> <span style=color:#8be9fd;font-style:italic>repr</span>(kv))
+The first and most important task is to validate the connectivity and DNS resolution. You can run this code snippet in a notebook to check them.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>import</span> socket
+</span></span><span style=display:flex><span>stor <span style=color:#f92672>=</span> socket<span style=color:#f92672>.</span>gethostbyname_ex(<span style=color:#e6db74>&#34;blkstor.dfs.core.windows.net&#34;</span>)
+</span></span><span style=display:flex><span>print (<span style=color:#e6db74>&#34;</span><span style=color:#ae81ff>\n\n</span><span style=color:#e6db74>The IP Address of the Domain Name is: &#34;</span> <span style=color:#f92672>+</span> repr(stor))
+</span></span><span style=display:flex><span>kv <span style=color:#f92672>=</span> socket<span style=color:#f92672>.</span>gethostbyname_ex(<span style=color:#e6db74>&#34;blk-kv.vault.azure.net&#34;</span>)
+</span></span><span style=display:flex><span>print (<span style=color:#e6db74>&#34;</span><span style=color:#ae81ff>\n\n</span><span style=color:#e6db74>The IP Address of the Domain Name is: &#34;</span> <span style=color:#f92672>+</span> repr(kv))
 </span></span></code></pre></div><p>If all setup correctly you should be able to see that the DNS name is resolved with a private IP address.
-<img loading=lazy src=/posts/databricks-secure/notebook1.png alt=notebook></p><p>If you are interest in further testing to read some file from ADLS you could use the following snippet to do so.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=display:flex><span>dbutils<span style=color:#ff79c6>.</span>widgets<span style=color:#ff79c6>.</span>text(<span style=color:#f1fa8c>&#34;adls_name&#34;</span>,  <span style=color:#f1fa8c>&#34;blkstor&#34;</span>, <span style=color:#f1fa8c>&#34;adls_name&#34;</span>)
-</span></span><span style=display:flex><span>dbutils<span style=color:#ff79c6>.</span>widgets<span style=color:#ff79c6>.</span>text(<span style=color:#f1fa8c>&#34;adls_container&#34;</span>,  <span style=color:#f1fa8c>&#34;land&#34;</span>, <span style=color:#f1fa8c>&#34;adls_container&#34;</span>)
-</span></span><span style=display:flex><span><span style=color:#6272a4># COMMAND ----------</span>
-</span></span><span style=display:flex><span>adls_name <span style=color:#ff79c6>=</span> dbutils<span style=color:#ff79c6>.</span>widgets<span style=color:#ff79c6>.</span>get(<span style=color:#f1fa8c>&#34;adls_name&#34;</span>)
-</span></span><span style=display:flex><span>adls_container <span style=color:#ff79c6>=</span> dbutils<span style=color:#ff79c6>.</span>widgets<span style=color:#ff79c6>.</span>get(<span style=color:#f1fa8c>&#34;adls_container&#34;</span>)
-</span></span><span style=display:flex><span><span style=color:#6272a4># COMMAND ----------</span>
-</span></span><span style=display:flex><span>spark<span style=color:#ff79c6>.</span>conf<span style=color:#ff79c6>.</span>set(<span style=color:#f1fa8c>&#34;fs.azure.account.auth.type&#34;</span>, <span style=color:#f1fa8c>&#34;OAuth&#34;</span>)
-</span></span><span style=display:flex><span>spark<span style=color:#ff79c6>.</span>conf<span style=color:#ff79c6>.</span>set(<span style=color:#f1fa8c>&#34;fs.azure.account.oauth.provider.type&#34;</span>, <span style=color:#f1fa8c>&#34;org.apache.hadoop.fs.azurebfs.oauth2.ClientCredsTokenProvider&#34;</span>)
-</span></span><span style=display:flex><span>spark<span style=color:#ff79c6>.</span>conf<span style=color:#ff79c6>.</span>set(<span style=color:#f1fa8c>&#34;fs.azure.account.oauth2.client.id&#34;</span>, dbutils<span style=color:#ff79c6>.</span>secrets<span style=color:#ff79c6>.</span>get(scope<span style=color:#ff79c6>=</span><span style=color:#f1fa8c>&#34;keyvault-managed&#34;</span>,key<span style=color:#ff79c6>=</span><span style=color:#f1fa8c>&#34;sp-id&#34;</span>))
-</span></span><span style=display:flex><span>spark<span style=color:#ff79c6>.</span>conf<span style=color:#ff79c6>.</span>set(<span style=color:#f1fa8c>&#34;fs.azure.account.oauth2.client.secret&#34;</span>, dbutils<span style=color:#ff79c6>.</span>secrets<span style=color:#ff79c6>.</span>get(scope<span style=color:#ff79c6>=</span><span style=color:#f1fa8c>&#34;keyvault-managed&#34;</span>,key<span style=color:#ff79c6>=</span><span style=color:#f1fa8c>&#34;sp-secret&#34;</span>))
-</span></span><span style=display:flex><span>spark<span style=color:#ff79c6>.</span>conf<span style=color:#ff79c6>.</span>set(<span style=color:#f1fa8c>&#34;fs.azure.account.oauth2.client.endpoint&#34;</span>, <span style=color:#f1fa8c>&#34;https://login.microsoftonline.com/xxxx-xxx-xxxxxx-xxxxxx/oauth2/token&#34;</span>)
+<img loading=lazy src=/posts/databricks-secure/notebook1.png alt=notebook></p><p>If you are interest in further testing to read some file from ADLS you could use the following snippet to do so.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=display:flex><span>dbutils<span style=color:#f92672>.</span>widgets<span style=color:#f92672>.</span>text(<span style=color:#e6db74>&#34;adls_name&#34;</span>,  <span style=color:#e6db74>&#34;blkstor&#34;</span>, <span style=color:#e6db74>&#34;adls_name&#34;</span>)
+</span></span><span style=display:flex><span>dbutils<span style=color:#f92672>.</span>widgets<span style=color:#f92672>.</span>text(<span style=color:#e6db74>&#34;adls_container&#34;</span>,  <span style=color:#e6db74>&#34;land&#34;</span>, <span style=color:#e6db74>&#34;adls_container&#34;</span>)
+</span></span><span style=display:flex><span><span style=color:#75715e># COMMAND ----------</span>
+</span></span><span style=display:flex><span>adls_name <span style=color:#f92672>=</span> dbutils<span style=color:#f92672>.</span>widgets<span style=color:#f92672>.</span>get(<span style=color:#e6db74>&#34;adls_name&#34;</span>)
+</span></span><span style=display:flex><span>adls_container <span style=color:#f92672>=</span> dbutils<span style=color:#f92672>.</span>widgets<span style=color:#f92672>.</span>get(<span style=color:#e6db74>&#34;adls_container&#34;</span>)
+</span></span><span style=display:flex><span><span style=color:#75715e># COMMAND ----------</span>
+</span></span><span style=display:flex><span>spark<span style=color:#f92672>.</span>conf<span style=color:#f92672>.</span>set(<span style=color:#e6db74>&#34;fs.azure.account.auth.type&#34;</span>, <span style=color:#e6db74>&#34;OAuth&#34;</span>)
+</span></span><span style=display:flex><span>spark<span style=color:#f92672>.</span>conf<span style=color:#f92672>.</span>set(<span style=color:#e6db74>&#34;fs.azure.account.oauth.provider.type&#34;</span>, <span style=color:#e6db74>&#34;org.apache.hadoop.fs.azurebfs.oauth2.ClientCredsTokenProvider&#34;</span>)
+</span></span><span style=display:flex><span>spark<span style=color:#f92672>.</span>conf<span style=color:#f92672>.</span>set(<span style=color:#e6db74>&#34;fs.azure.account.oauth2.client.id&#34;</span>, dbutils<span style=color:#f92672>.</span>secrets<span style=color:#f92672>.</span>get(scope<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;keyvault-managed&#34;</span>,key<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;sp-id&#34;</span>))
+</span></span><span style=display:flex><span>spark<span style=color:#f92672>.</span>conf<span style=color:#f92672>.</span>set(<span style=color:#e6db74>&#34;fs.azure.account.oauth2.client.secret&#34;</span>, dbutils<span style=color:#f92672>.</span>secrets<span style=color:#f92672>.</span>get(scope<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;keyvault-managed&#34;</span>,key<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;sp-secret&#34;</span>))
+</span></span><span style=display:flex><span>spark<span style=color:#f92672>.</span>conf<span style=color:#f92672>.</span>set(<span style=color:#e6db74>&#34;fs.azure.account.oauth2.client.endpoint&#34;</span>, <span style=color:#e6db74>&#34;https://login.microsoftonline.com/xxxx-xxx-xxxxxx-xxxxxx/oauth2/token&#34;</span>)
 </span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#6272a4># COMMAND ----------</span>
-</span></span><span style=display:flex><span>df <span style=color:#ff79c6>=</span> spark<span style=color:#ff79c6>.</span>read<span style=color:#ff79c6>.</span>json(<span style=color:#f1fa8c>f</span><span style=color:#f1fa8c>&#34;abfss://</span><span style=color:#f1fa8c>{</span>adls_container<span style=color:#f1fa8c>}</span><span style=color:#f1fa8c>@</span><span style=color:#f1fa8c>{</span>adls_name<span style=color:#f1fa8c>}</span><span style=color:#f1fa8c>.dfs.core.windows.net/pubapis.json&#34;</span>)
-</span></span><span style=display:flex><span><span style=color:#6272a4># COMMAND ----------</span>
-</span></span><span style=display:flex><span>df<span style=color:#ff79c6>.</span>show()
+</span></span><span style=display:flex><span><span style=color:#75715e># COMMAND ----------</span>
+</span></span><span style=display:flex><span>df <span style=color:#f92672>=</span> spark<span style=color:#f92672>.</span>read<span style=color:#f92672>.</span>json(<span style=color:#e6db74>f</span><span style=color:#e6db74>&#34;abfss://</span><span style=color:#e6db74>{</span>adls_container<span style=color:#e6db74>}</span><span style=color:#e6db74>@</span><span style=color:#e6db74>{</span>adls_name<span style=color:#e6db74>}</span><span style=color:#e6db74>.dfs.core.windows.net/pubapis.json&#34;</span>)
+</span></span><span style=display:flex><span><span style=color:#75715e># COMMAND ----------</span>
+</span></span><span style=display:flex><span>df<span style=color:#f92672>.</span>show()
 </span></span></code></pre></div><p>What this notebook does is quite simple, it grabs the secret of a service principal from keyvault secret scope and use that to auth to Azure.
 Once authorized it will read a json file into dataframe. Please seethe outcome of the notebook run in the following screen shot.
-<img loading=lazy src=/posts/databricks-secure/notebook2.png alt=notebook2></p><p>To be able to achieve this, you will need the following:</p><ol><li>another service principal that has the role &ldquo;Storage blob contributor&rdquo; on the storage account</li><li>having the application id and secret saved in the Keyvault we created as &ldquo;sp-id&rdquo; and &ldquo;sp-secret&rdquo;</li></ol><p>I have included these two notebooks in the repo, you will find them in the notebooks folder.</p><p>To deploy the notebooks to our databricks workspace, you could add the following to your main.tf file as part of the deployment.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-tf data-lang=tf><span style=display:flex><span><span style=color:#ff79c6>resource</span> <span style=color:#f1fa8c>&#34;databricks_notebook&#34;</span> <span style=color:#f1fa8c>&#34;notbooks&#34;</span> {
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>for_each</span> = <span style=color:#8be9fd;font-style:italic>fileset</span>(<span style=color:#f1fa8c>&#34;</span><span style=color:#f1fa8c>${</span>path.<span style=color:#8be9fd;font-style:italic>module</span><span style=color:#f1fa8c>}</span><span style=color:#f1fa8c>/notebooks&#34;</span>, <span style=color:#f1fa8c>&#34;*&#34;</span>)
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>source</span> = <span style=color:#f1fa8c>&#34;</span><span style=color:#f1fa8c>${</span>path.<span style=color:#8be9fd;font-style:italic>module</span><span style=color:#f1fa8c>}</span><span style=color:#f1fa8c>/notebooks/</span><span style=color:#f1fa8c>${</span><span style=color:#8be9fd;font-style:italic>each</span>.key<span style=color:#f1fa8c>}</span><span style=color:#f1fa8c>&#34;</span>
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>path</span>   = <span style=color:#f1fa8c>&#34;/validation/</span><span style=color:#f1fa8c>${</span>element(<span style=color:#8be9fd;font-style:italic>split</span>(<span style=color:#f1fa8c>&#34;.&#34;</span>, <span style=color:#8be9fd;font-style:italic>each</span>.key), <span style=color:#bd93f9>0</span>)<span style=color:#f1fa8c>}</span><span style=color:#f1fa8c>&#34;</span>
-</span></span><span style=display:flex><span>  <span style=color:#50fa7b>language</span> = <span style=color:#f1fa8c>&#34;PYTHON&#34;</span>
+<img loading=lazy src=/posts/databricks-secure/notebook2.png alt=notebook2></p><p>To be able to achieve this, you will need the following:</p><ol><li>another service principal that has the role &ldquo;Storage blob contributor&rdquo; on the storage account</li><li>having the application id and secret saved in the Keyvault we created as &ldquo;sp-id&rdquo; and &ldquo;sp-secret&rdquo;</li></ol><p>I have included these two notebooks in the repo, you will find them in the notebooks folder.</p><p>To deploy the notebooks to our databricks workspace, you could add the following to your main.tf file as part of the deployment.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-tf data-lang=tf><span style=display:flex><span><span style=color:#66d9ef>resource</span> <span style=color:#e6db74>&#34;databricks_notebook&#34;</span> <span style=color:#e6db74>&#34;notbooks&#34;</span> {
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>for_each</span> = fileset(<span style=color:#e6db74>&#34;</span><span style=color:#e6db74>${</span><span style=color:#a6e22e>path</span>.module<span style=color:#e6db74>}</span><span style=color:#e6db74>/notebooks&#34;</span>, <span style=color:#e6db74>&#34;*&#34;</span>)
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>source</span> = <span style=color:#e6db74>&#34;</span><span style=color:#e6db74>${</span><span style=color:#a6e22e>path</span>.module<span style=color:#e6db74>}</span><span style=color:#e6db74>/notebooks/</span><span style=color:#e6db74>${</span>each.<span style=color:#a6e22e>key</span><span style=color:#e6db74>}</span><span style=color:#e6db74>&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>path</span>   = <span style=color:#e6db74>&#34;/validation/</span><span style=color:#e6db74>${</span><span style=color:#a6e22e>element</span>(split(<span style=color:#e6db74>&#34;.&#34;</span>, each.<span style=color:#a6e22e>key</span>), <span style=color:#ae81ff>0</span>)<span style=color:#e6db74>}</span><span style=color:#e6db74>&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>language</span> = <span style=color:#e6db74>&#34;PYTHON&#34;</span>
 </span></span><span style=display:flex><span>}
 </span></span></code></pre></div><p>This block iterate through the notebooks folder and deploy the notebook in a folder called &ldquo;validated&rdquo; in the workspace.<div class=Note style=background-color:var(--note);font-size:15px;margin-bottom:10px;margin-top:10px;padding:10px;border-radius:10px><i class="fas fa-exclamation-triangle"></i>
 Note usually you would not deploy your notebooks as part of IaC efforts, these would otherwise be regarded as the "application" artifacts. But for simplicity of our demo, they are deployed in the same IaC code flow.</div></p><p>At this point our lab has reached the end, hope you enjoyed the extra efforts needed to make your databricks cluster more secure.</p><p>If like the content please leave your comments below, if you fine issues with the content, please also comment below. Thanks for your time and patience with me !!</p></div><footer class=post-footer><ul class=post-tags><li><i class="fas fa-tags fa-sm"></i></li><li><a href=https://blacklabnz.github.io/tags/terraform/>terraform</a></li><li><a href=https://blacklabnz.github.io/tags/databricks/>databricks</a></li><li><a href=https://blacklabnz.github.io/tags/private-endpoints/>private endpoints</a></li><li><a href=https://blacklabnz.github.io/tags/databricks-secure-connectivity/>databricks secure connectivity</a></li><li><a href=https://blacklabnz.github.io/tags/databricks-vnet-injection/>databricks vNet injection</a></li><li><a href=https://blacklabnz.github.io/tags/keyvault-backed-secret-scope/>keyvault backed secret scope</a></li></ul><nav class=paginav><a class=prev href=https://blacklabnz.github.io/posts/websocket-prometheus/><span class=title>« Prev Page</span><br><span>Consume Websocket stream and send to Prometheus in Python</span></a></nav><div class=share-buttons><a>Share via:</a>
