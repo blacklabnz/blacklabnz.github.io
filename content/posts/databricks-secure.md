@@ -29,7 +29,7 @@ As revealed on the diagram, we are simulating a well adopted hub and spoke topol
 For the storage account private endpoint, well, we could have deployed that into the databricks vNet and they would naturally have connectivity(and secured by NSG if needed). But that removes the fun of dealing with Networking and sometime there are enough reason on the design to keep the private endpoint virtual network separate from other virtual network. We will also create keyvault with private endpoint and use that for a [KV backed secret scope](https://docs.microsoft.com/en-us/azure/databricks/security/secrets/secret-scopes) in databricks. In a nutshell a secret scope is a way to securely store secrets such as service principal key or a storage account key or any other type of secrets as such, so that we do hard code and secrets but are able to use "dbutil" to retrieve the secrets in a notebook run. Simple but yet important principle right ? no hard coded secret in your source code !!!!
 
 ### Project setup
-```
+```bash
 ├── README.md
 ├── data.tf
 ├── main.tf
@@ -47,7 +47,7 @@ For your convenience, you can download tf module required for this lab from my g
 First thing before carry on to the next part is to setup the providers. 
 
 > providers.tf
-```
+```bash
 terraform {
   required_providers {
     azurerm = {
@@ -87,7 +87,7 @@ line 16 to line 19 we use service principal to authenticate to azure, in here we
 To be able to use variables we will need to add the following to the variables file:
 
 > variable.tf
-```
+```bash
 variable "subscription_id" {
   type = string
   default = "default"
@@ -108,7 +108,7 @@ variable "tenant_id" {
 line 23 to 27 similar deal here. One thing to note is that we are retrieving the databricks workspace url and resource id by using tf data object. The following needs to be added in the data.tf to achieve this.
 
 > data.tf
-```
+```bash
 data "azurerm_databricks_workspace" "dbr" {
   name                = azurerm_databricks_workspace.dbr.name
   resource_group_name = local.rg
@@ -122,14 +122,14 @@ Once Service principal is created you will need to create a secret and use that 
 4. azure tenant id.
 
 > values.tfvars
-```
+```bash
 subscription_id = "xxxxxxxxx"
 client_id       = "xxxxxxxxx"
 client_secret   = "xxxxxxxxx"
 tenant_id       = "xxxxxxxxx"
 ```
 At this point we will need to initiate our terraform workspace by running:
-```
+```bash
 terraform init
 ```
 With that all set, lets move on to next part of creating actual resources.
@@ -138,7 +138,7 @@ With that all set, lets move on to next part of creating actual resources.
 First we will add some variables to main.tf that we can use in the main file to the locals block
 
 > main.tf
-```
+```bash
 locals {
   org           = "blk"
   rg            = "${local.org}-secure-dbr"
@@ -173,7 +173,7 @@ Pretty standard configuration here, one thing to note is that the subnets name i
 All we need to do is to add the following to main.tf next to the locals block.
 
 > main.tf
-```
+```bash
 resource "azurerm_resource_group" "secure_dbr" {
   name     = local.rg
   location = local.rg_location
@@ -238,7 +238,7 @@ Note in each of the subnet there is subnet delegation properties that needs to b
 
 ### 2.2 Spoke vNet for storage account and keyvault
 Nothing complicated here, just need a separate subnets for storage account and keyvault private endpoints. Add the following to main.tf file.
-```
+```bash
 resource "azurerm_virtual_network" "vnet_resource" {
   name                = local.vnet_resource
   location            = local.rg_location
@@ -273,7 +273,7 @@ Note the difference on the subnet compare to the above. Subnets provisioned for 
 
 ### 2.3 vNet peering
 Virtual network peering ensures the connectivity between two virtual networks. In some environments direct spoke to spoke communication via peering is disable, all traffic between vNet peers goes via hub network, filtered and processed by firewall. However purpose of our lab is to focus on Databricks and private endpoints, we will use peering, a simpler setup to achieve spoke to spoke connectivity. I will write a separate article to talk about best practice of Hub-Spoke topology.
-```
+```bash
 resource "azurerm_virtual_network_peering" "dbr_to_resource" {
   name                      = "dbr-vent-to-resource-vnet"
   resource_group_name       = local.rg
@@ -293,11 +293,11 @@ The vNet peering needs to be setup from both directions, hence you find that the
 
 Once you have all the code in, lets create resources in a iterative fashion by running  
 
-```
+```bash
 terraform plan -var-file=values.tfvars
 ```
 followed by:
-```
+```bash
 terraform apply -auto-approve -var-file=values.tfvars
 ```
 Let quickly go to the portal and validate that our vNets are created and peering is all connected.
@@ -308,7 +308,7 @@ Lets create Databricks workspace and clusters in this part.
 ### 3.1 Databricks secure connectivity + vNet injection
 To remove the exposure to public internet traffic, clusters can be deployed with no-pubip configuration and deployed into pre-defined vNet.
 First need to add the following to locals block:
-```
+```bash
 dbr         = "${local.org}-secure-dbr"
 dbr_sku     = "premium"
 dbr_mgmt_rg = "${local.dbr}-mgmt-rg"
@@ -316,7 +316,7 @@ dbr_nsg     = "${local.org}-nsg"
 dbr_cluster = "${local.org}-cluster"
 ```
 Then add the following to main.tf
-```
+```bash
 resource "azurerm_network_security_group" "dbr_nsg" {
   name                = local.dbr_nsg
   location            = local.rg_location
@@ -362,7 +362,7 @@ Please customize your NSG if you are using this in higher environments, current 
 
 ### 3.2 Cluster creation
 We will use terraform to create clusters, note we will need to add [databricks provider](https://registry.terraform.io/providers/databrickslabs/databricks/latest/docs) to terraform which was already performed in earlier steps.
-```
+```bash
 resource "databricks_cluster" "cluster" {
   cluster_name            = local.dbr_cluster
   spark_version           = data.databricks_spark_version.latest.id
@@ -381,7 +381,7 @@ resource "databricks_cluster" "cluster" {
 
 you will also need to add the following to the data.tf file so that databricks provide can retrieve some information dynamically for the provisioning.
 > data.tf
-```
+```bash
 data "databricks_spark_version" "latest" {}
 
 data "databricks_node_type" "smallest" {
@@ -393,11 +393,11 @@ The cluster we provisioned is single cluster which is capable enough to help to 
 
 Once you have all the code in, lets create resources in a iterative fashion by running  
 
-```
+```bash
 terraform plan -var-file=values.tfvars
 ```
 followed by:
-```
+```bash
 terraform apply -auto-approve -var-file=values.tfvars
 ```
 Lets login to our databricks instance and validate the cluster is in place.
@@ -410,7 +410,7 @@ Lets create ADLS account and Keyvault in this part with private endpoints and pr
 This part shouldnt be too bad, a storage account with private endpoint deployed to the spoke network. 
 
 First need to add the following to the locals block:
-```
+```bash
 stor         = "${local.org}stor"
 stor_pe      = "${local.stor}pe"
 stor_prv_con = "${local.stor}prvcon"
@@ -420,7 +420,7 @@ kv_pe      = "${local.kv}pe"
 kv_prv_con = "${local.kv}prvcon"
 ```
 Then add the following to main.tf file：
-```
+```bash
 resource "azurerm_storage_account" "stor" {
   name                = local.stor
   resource_group_name = local.rg
@@ -479,7 +479,7 @@ resource "azurerm_private_dns_a_record" "storpe_dns" {
 ```
 ### Quick explanation
 Line 11-14 defined the firewall rules so that we are not open our storage account to public by default. Note the "data.external.my_ip.result.ip", because we still want to be operate the storage account from out local machine hence the data block retrieve your current public ip and inject that to network policy. You will also need to add the following to your data.tf file：
-```
+```bash
 data "external" "my_ip" {
   program = ["curl", "https://api.ipify.org?format=json"]
 }
@@ -494,7 +494,7 @@ Note when creating private endpoint, there will be a network interface attached 
 
 ### 4.2 Keyvault with private endpoint and private DNS zone
 This one is not too bad either, keyvualt with private endpoint deployed to the same spoke network with similar setup on the private DNS zone, vNet linkage and dns records
-```
+```bash
 resource "azurerm_key_vault" "kv" {
   name                        = local.kv
   location                    = local.rg_location
@@ -549,17 +549,17 @@ resource "azurerm_private_dns_a_record" "kvpe_dns" {
 ```
 Once you have all the code in, lets create resources in a iterative fashion by running  
 
-```
+```bash
 terraform plan -var-file=values.tfvars
 ```
 followed by:
-```
+```bash
 terraform apply -auto-approve -var-file=values.tfvars
 ```
 
 ## Part 5 Databricks configuration - Keyvault backed secret scope
 To create the keyvault backed secret scope, terraform provides a handy resource to do this. add the following to the main.tf files to achieve this.
-```
+```bash
 resource "databricks_secret_scope" "kv" {
   name = "keyvault-managed"
 
@@ -572,7 +572,7 @@ resource "databricks_secret_scope" "kv" {
 The tricky part here is that according to terraform this is only supported by azure cli authentication but NOT with service principal authentication. You will see error like this if service principal auth is used:
 ![error]({{< get_image_link image_name="error.png" >}})
 what you will need to do is to comment out the azurerm authentication part in the providers.tf and then login to Azure using
-```
+```bash
 az login
 ```
 If you haven't installed Az cli following [this](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) to install and read more details of this limitation [here](https://registry.terraform.io/providers/databrickslabs/databricks/latest/docs/resources/secret_scope).
@@ -580,13 +580,14 @@ If you haven't installed Az cli following [this](https://docs.microsoft.com/en-u
 ## Part 6 Run notebook to validate
 Let put some python code in and test the connectivity and DNS resolutions.
 The first and most important task is to validate the connectivity and DNS resolution. You can run this code snippet in a notebook to check them.
-```
+{{< highlight go "linenos=table" >}}
 import socket
 stor = socket.gethostbyname_ex("blkstor.dfs.core.windows.net")
 print ("\n\nThe IP Address of the Domain Name is: " + repr(stor))
 kv = socket.gethostbyname_ex("blk-kv.vault.azure.net")
 print ("\n\nThe IP Address of the Domain Name is: " + repr(kv))
-```
+{{< / highlight >}}
+
 If all setup correctly you should be able to see that the DNS name is resolved with a private IP address.
 ![notebook]({{< get_image_link image_name="notebook1.png" >}})
 
@@ -621,7 +622,7 @@ To be able to achieve this, you will need the following:
 I have included these two notebooks in the repo, you will find them in the notebooks folder.
 
 To deploy the notebooks to our databricks workspace, you could add the following to your main.tf file as part of the deployment.
-```
+```bash
 resource "databricks_notebook" "notbooks" {
   for_each = fileset("${path.module}/notebooks", "*")
   source = "${path.module}/notebooks/${each.key}"
