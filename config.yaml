@@ -146,10 +146,10 @@ markup:
         renderer:
             unsafe: true
     highlight:
-        anchorLineNos: true
+        anchorLineNos: false
         codeFences: true
         guessSyntax: false
-        lineNos: false
+        lineNos: true
         style: dracula
 
 # Used for displaying categories and tag page result
