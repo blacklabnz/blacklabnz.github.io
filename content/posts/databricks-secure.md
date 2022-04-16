@@ -580,14 +580,13 @@ If you haven't installed Az cli following [this](https://docs.microsoft.com/en-u
 ## Part 6 Run notebook to validate
 Let put some python code in and test the connectivity and DNS resolutions.
 The first and most important task is to validate the connectivity and DNS resolution. You can run this code snippet in a notebook to check them.
-{{< highlight go "linenos=table" >}}
+```
 import socket
 stor = socket.gethostbyname_ex("blkstor.dfs.core.windows.net")
 print ("\n\nThe IP Address of the Domain Name is: " + repr(stor))
 kv = socket.gethostbyname_ex("blk-kv.vault.azure.net")
 print ("\n\nThe IP Address of the Domain Name is: " + repr(kv))
-{{< / highlight >}}
-
+```
 If all setup correctly you should be able to see that the DNS name is resolved with a private IP address.
 ![notebook]({{< get_image_link image_name="notebook1.png" >}})
 
