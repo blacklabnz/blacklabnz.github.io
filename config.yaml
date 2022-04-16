@@ -148,7 +148,7 @@ markup:
     highlight:
         anchorLineNos: false
         codeFences: true
-        guessSyntax: false
+        guessSyntax: true
         lineNos: true
         style: dracula
 
