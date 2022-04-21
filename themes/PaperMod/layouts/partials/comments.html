@@ -4,16 +4,25 @@
 
 
 {{- if (eq .Site.Params.comments true) }}
-<!-- <div id="utterance-dark">
-    <script src="https://utteranc.es/client.js"
-        repo="blacklabnz/blacklabnz.github.io"
-        issue-term="pathname"
-        theme="photon-dark"
-        crossorigin="anonymous"
-        async>
-    </script>
-</div> -->
-<!-- <div id="utterance-light">
+<div id="page-comments"></div>
+<script>
+    let currentTheme = document.getElementsByClassName("dark")[0];
+    let utterance = document.createElement('script');
+    utterance.src = 'https://utteranc.es/client.js';
+    utterance.setAttribute('repo', 'blacklabnz/blacklabnz.github.io');
+    utterance.setAttribute('issue-term', 'pathname');
+
+    utterance.setAttribute('crossorigin', 'anonymous');
+    utterance.setAttribute('async', '');
+    if (currentTheme) {
+        utterance.setAttribute('theme', 'photon-dark');
+    } else {
+        utterance.setAttribute('theme', 'github-light');
+    }
+    document.querySelector('#page-comments').innerHTML = '';
+    document.querySelector('#page-comments').appendChild(utterance);
+</script>
+<!-- <div id="page-comments">
     <script src="https://utteranc.es/client.js"
         repo="blacklabnz/blacklabnz.github.io"
         issue-term="pathname"
@@ -22,15 +31,6 @@
         async>
     </script>
 </div> -->
-<div id="page-comments">
-    <script src="https://utteranc.es/client.js"
-        repo="blacklabnz/blacklabnz.github.io"
-        issue-term="pathname"
-        theme="github-light"
-        crossorigin="anonymous"
-        async>
-    </script>
-</div>
 {{- $menu := slice (resources.Get "js/utterance-theme.js") | resources.Concat "assets/js/utterance-theme.js" | minify }}
 <script src="{{ $menu.RelPermalink }}"></script>
 {{- end }}
