@@ -508,6 +508,8 @@ We are able to that VM in app subnet in vNet_a is able to ping VM in vNet_b and 
 ## Part 4 Azure log analytics analysis
 We are also able to inspect the traffic once we enable Log Analytics for firewall. Follow [this](https://docs.microsoft.com/en-us/azure/firewall/firewall-diagnostics#enable-diagnostic-logging-through-the-azure-portal) to enable diagnostic loggings.
 ![azfirewall]({{< get_image_link image_name="azfirewall.png" >}})
-As show on the screen shot we have firewall logging all the traffic including allowed and denied traffic.
+As shown on the screen shot we have firewall logging all the traffic including allowed and denied traffic.
+VM from vNet_a has connectivity to VMs in vNet_b and VMs in onprem network.
+VM from vNet_b has connectivity to VMs in vNet_b but not VMs in onprem network.
 
 Congrats! you'v reached the end of this post, thanks for your patience! Please leave your comments at the bottom if you find this post helpful! Cheers ! 
