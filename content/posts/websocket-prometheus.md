@@ -7,7 +7,7 @@ tags: ["websocket", "prometheus", "python" ]
 categories: ["devops", "monitoring"]
 ShowToc: true
 TocOpen: false
-weight: 1
+weight: 0
 ---
 
 Recently I was tasked with consuming data from websocket, analyze it and then send data to Prometheus.
