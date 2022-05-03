@@ -636,4 +636,4 @@ Note usually you would not deploy your notebooks as part of IaC efforts, these w
 
 At this point our lab has reached the end, hope you enjoyed the extra efforts needed to make your databricks cluster more secure.
 
-If like the content please leave your comments below, if you fine issues with the content, please also comment below. Thanks for your time and patience with me !! 
+If like the content please leave your comments below, if you find issues with the content, please also comment below. Thanks for your time and patience with me !! 
