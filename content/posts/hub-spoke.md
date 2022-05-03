@@ -4,6 +4,8 @@ date: "2022-04-11"
 draft: false
 tags: ["terraform", "hub and spoke", "private endpoints", "azure firewall", "forced tunneling"]
 categories: ["networking", "security"]
+author: "Neil Xu"
+ShowToc: true
 ---
 The hub and spoke topology has been widely adopted for enterprise production deployment.
 In this lab, let put on our network/infrastructure engineer hat and get our hand dirty on Azure Hub and spoke topology with one of the popular IaC -- Terraform.
