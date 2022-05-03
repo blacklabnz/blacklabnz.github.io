@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
-    <title>databricks on blacklabnz | Data | DevOps</title>
-    <link>https://blacklabnz.github.io/categories/databricks/</link>
-    <description>Recent content in databricks on blacklabnz | Data | DevOps</description>
+    <title>delta-lake on blacklabnz | Data | DevOps</title>
+    <link>https://blacklabnz.github.io/tags/delta-lake/</link>
+    <description>Recent content in delta-lake on blacklabnz | Data | DevOps</description>
     <image>
       <url>https://blacklabnz.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
       <link>https://blacklabnz.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
     </image>
     <generator>Hugo -- gohugo.io</generator>
-    <lastBuildDate>Sat, 30 Apr 2022 23:39:13 +1300</lastBuildDate><atom:link href="https://blacklabnz.github.io/categories/databricks/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 30 Apr 2022 23:39:13 +1300</lastBuildDate><atom:link href="https://blacklabnz.github.io/tags/delta-lake/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Databrick row and column level security</title>
       <link>https://blacklabnz.github.io/posts/databricks-row-security/</link>
@@ -17,17 +17,6 @@
       
       <guid>https://blacklabnz.github.io/posts/databricks-row-security/</guid>
       <description>Recently I had a chat with one of client regarding on access control of their reports and dashboards. Interestingly it was found out that client is currently doing this by creating similar reports and granting access to people in different security groups. Obviously this is not the best idea because of redundant reports, the ideal solution is to implement row and column level security on the table so that people in different access groups will have visibility to subsets of the rows in the table or view.</description>
-    </item>
-    
-    <item>
-      <title>Secure Databricks cluster with vNet injection and access resources via Azure private endpoint</title>
-      <link>https://blacklabnz.github.io/posts/databricks-secure/</link>
-      <pubDate>Mon, 28 Mar 2022 23:39:13 +1300</pubDate>
-      
-      <guid>https://blacklabnz.github.io/posts/databricks-secure/</guid>
-      <description>What an interesting topic I had recently regarding on security hardening Databricks using Secure cluster connectivity + vNet injection.
-This configuration will allow the cluster to access Azure Data Lake Storage (I know right ?! what a popular combination!) and keyvault with private endpoint.
-In this post, in a lab environment, we will find out how we can put Databricks cluster inside existing Azure virtual network and access private endpoint deployed inside it.</description>
     </item>
     
   </channel>
