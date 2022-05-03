@@ -1,5 +1,5 @@
 ---
-title: "Databrick row and column level security"
+title: "Databricks row and column level security"
 date: 2022-04-30T23:39:13+13:00
 draft: false
 tags: ["databricks", "delta-lake", "row level security", "column level security"]
