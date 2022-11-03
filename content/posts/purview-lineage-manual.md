@@ -13,7 +13,7 @@ While the auto scanned lineage is useful most of the times, there are always cas
 
 In this post, let's explore how we can do that with [pyapacheatlas](https://github.com/wjohnson/pyapacheatlas) in python, alternatively if you are planning to build you custom solution, you might want to refer to [Purview REST API](https://learn.microsoft.com/en-us/azure/purview/tutorial-using-rest-apis). We will start with using Databricks to run some sample transformation, then we will create a Purview instance and do some data sources scanning. Once completed, we will create the lineage using python which you could either run in Databricks notebook or in python local environment. So let dive into it！
 
-## Setup Databircks and ADLS account to run sample transformation
+## Setup Databricks and ADLS account to run sample transformation
 First we need to setup Databricks and Azure ADLS (storage account) in order to do some sample transformation. Obviously our focus in the lab is not IaC and the easiest way is via manual efforts. However if you are interested in IaC, you can refer to my other post [Secure Databricks](http://localhost:1313/posts/databricks-secure/) where I focused on setting up everything using terraform.
 ### Create Databricks clusters
 You could easily create cluster using the interactive wizard in Azure portal and I hope that is smooth experience for you. 
