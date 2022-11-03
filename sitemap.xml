@@ -3,7 +3,34 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://blacklabnz.github.io/categories/</loc>
-    <lastmod>2022-04-30T23:39:13+13:00</lastmod>
+    <lastmod>2022-10-30T00:39:13+13:00</lastmod>
+  </url><url>
+    <loc>https://blacklabnz.github.io/tags/data-catalogue/</loc>
+    <lastmod>2022-10-30T00:39:13+13:00</lastmod>
+  </url><url>
+    <loc>https://blacklabnz.github.io/categories/data-governance/</loc>
+    <lastmod>2022-10-30T00:39:13+13:00</lastmod>
+  </url><url>
+    <loc>https://blacklabnz.github.io/tags/lineage/</loc>
+    <lastmod>2022-10-30T00:39:13+13:00</lastmod>
+  </url><url>
+    <loc>https://blacklabnz.github.io/posts/</loc>
+    <lastmod>2022-10-30T00:39:13+13:00</lastmod>
+  </url><url>
+    <loc>https://blacklabnz.github.io/tags/purview/</loc>
+    <lastmod>2022-10-30T00:39:13+13:00</lastmod>
+  </url><url>
+    <loc>https://blacklabnz.github.io/categories/purview/</loc>
+    <lastmod>2022-10-30T00:39:13+13:00</lastmod>
+  </url><url>
+    <loc>https://blacklabnz.github.io/posts/purview-lineage-manual/</loc>
+    <lastmod>2022-10-30T00:39:13+13:00</lastmod>
+  </url><url>
+    <loc>https://blacklabnz.github.io/tags/pyapacheatlas/</loc>
+    <lastmod>2022-10-30T00:39:13+13:00</lastmod>
+  </url><url>
+    <loc>https://blacklabnz.github.io/tags/</loc>
+    <lastmod>2022-10-30T00:39:13+13:00</lastmod>
   </url><url>
     <loc>https://blacklabnz.github.io/tags/column-level-security/</loc>
     <lastmod>2022-04-30T23:39:13+13:00</lastmod>
@@ -20,16 +47,10 @@
     <loc>https://blacklabnz.github.io/tags/delta-lake/</loc>
     <lastmod>2022-04-30T23:39:13+13:00</lastmod>
   </url><url>
-    <loc>https://blacklabnz.github.io/posts/</loc>
-    <lastmod>2022-04-30T23:39:13+13:00</lastmod>
-  </url><url>
     <loc>https://blacklabnz.github.io/tags/row-level-security/</loc>
     <lastmod>2022-04-30T23:39:13+13:00</lastmod>
   </url><url>
     <loc>https://blacklabnz.github.io/categories/security/</loc>
-    <lastmod>2022-04-30T23:39:13+13:00</lastmod>
-  </url><url>
-    <loc>https://blacklabnz.github.io/tags/</loc>
     <lastmod>2022-04-30T23:39:13+13:00</lastmod>
   </url><url>
     <loc>https://blacklabnz.github.io/tags/azure-firewall/</loc>

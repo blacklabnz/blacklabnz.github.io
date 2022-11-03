@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>data catalogue on blacklabnz | Data | DevOps</title>
+    <link>https://blacklabnz.github.io/tags/data-catalogue/</link>
+    <description>Recent content in data catalogue on blacklabnz | Data | DevOps</description>
+    <image>
+      <url>https://blacklabnz.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
+      <link>https://blacklabnz.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
+    </image>
+    <generator>Hugo -- gohugo.io</generator>
+    <lastBuildDate>Sun, 30 Oct 2022 00:39:13 +1300</lastBuildDate><atom:link href="https://blacklabnz.github.io/tags/data-catalogue/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Purview Lineage: Part A Databricks Manual Lineage</title>
+      <link>https://blacklabnz.github.io/posts/purview-lineage-manual/</link>
+      <pubDate>Sun, 30 Oct 2022 00:39:13 +1300</pubDate>
+      
+      <guid>https://blacklabnz.github.io/posts/purview-lineage-manual/</guid>
+      <description>Purview has been published by Microsoft as a unified data governance solution to help manage and govern your multi-cloud, SaaS and on prem data. You can create a holistic and up-to-date view of your data landscape with automated data discovery, data classification and end to end lineage. This provides data users with valuable, trustworthy data management. While the auto scanned lineage is useful most of the times, there are always cases where you need to manually generate your lineage graph.</description>
+    </item>
+    
+  </channel>
+</rss>

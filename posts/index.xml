@@ -9,7 +9,16 @@
       <link>https://blacklabnz.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
     </image>
     <generator>Hugo -- gohugo.io</generator>
-    <lastBuildDate>Sat, 30 Apr 2022 23:39:13 +1300</lastBuildDate><atom:link href="https://blacklabnz.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 30 Oct 2022 00:39:13 +1300</lastBuildDate><atom:link href="https://blacklabnz.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Purview Lineage: Part A Databricks Manual Lineage</title>
+      <link>https://blacklabnz.github.io/posts/purview-lineage-manual/</link>
+      <pubDate>Sun, 30 Oct 2022 00:39:13 +1300</pubDate>
+      
+      <guid>https://blacklabnz.github.io/posts/purview-lineage-manual/</guid>
+      <description>Purview has been published by Microsoft as a unified data governance solution to help manage and govern your multi-cloud, SaaS and on prem data. You can create a holistic and up-to-date view of your data landscape with automated data discovery, data classification and end to end lineage. This provides data users with valuable, trustworthy data management. While the auto scanned lineage is useful most of the times, there are always cases where you need to manually generate your lineage graph.</description>
+    </item>
+    
     <item>
       <title>Databricks row and column level security</title>
       <link>https://blacklabnz.github.io/posts/databricks-row-security/</link>
